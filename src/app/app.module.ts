@@ -5,6 +5,8 @@ import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
 
+import { UiModule } from './shared/index';
+
 @NgModule({
   declarations: [
     AppComponent
@@ -12,7 +14,8 @@ import { AppComponent } from './app.component';
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule
+    HttpModule,
+    UiModule
   ],
   providers: [],
   bootstrap: [AppComponent]
