@@ -70,11 +70,17 @@
     magic-string "^0.16.0"
     source-map "^0.5.6"
 
+"@types/electron@^1.4.30":
+  version "1.4.30"
+  resolved "https://registry.yarnpkg.com/@types/electron/-/electron-1.4.30.tgz#d79b1bc117b6cfa770220d6aeb5a475659cd7961"
+  dependencies:
+    "@types/node" "*"
+
 "@types/jasmine@2.5.38", "@types/jasmine@^2.5.36":
   version "2.5.38"
   resolved "https://registry.yarnpkg.com/@types/jasmine/-/jasmine-2.5.38.tgz#a4379124c4921d4e21de54ec74669c9e9b356717"
 
-"@types/node@^6.0.42", "@types/node@^6.0.46":
+"@types/node@*", "@types/node@^6.0.42", "@types/node@^6.0.46":
   version "6.0.53"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.53.tgz#8c300ca8ba51f80f98f3525b932ff47c6efd6be1"
 
@@ -509,13 +515,9 @@ base64-arraybuffer@0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/base64-arraybuffer/-/base64-arraybuffer-0.1.2.tgz#474df4a9f2da24e05df3158c3b1db3c3cd46a154"
 
-base64-js@1.1.2:
+base64-js@1.1.2, base64-js@^1.0.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.1.2.tgz#d6400cac1c4c660976d90d07a04351d89395f5e8"
-
-base64-js@^1.0.2:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.2.0.tgz#a39992d723584811982be5e290bb6a53d86700f1"
 
 base64id@0.1.0:
   version "0.1.0"
