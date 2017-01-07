@@ -36,6 +36,7 @@ Gruntfile.js
 .yarn-metadata.json
 .*.yml
 *.yml
+!.svgo.yml
 
 # misc
 *.gz
