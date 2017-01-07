@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 
-import { remote } from 'electron';
+const remote = require('electron').remote;
 
 @Component({
   selector: 'app-root',
@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
     });
 
     newW.on('close', () => newW = null);
-    newW.loadURL('https://www.google.com.hk');
+    newW.loadURL('file://' + remote.app.getAppPath() + '/dist/index.html');
     newW.show();
   }
 }
