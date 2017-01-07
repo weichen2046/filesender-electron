@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 
-const remote = require('electron').remote;
+//impprt { remote } from 'electron';
+//const remote = require('electron').remote;
+const { remote } = require('electron');
 
 @Component({
   selector: 'app-root',
