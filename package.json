@@ -7,8 +7,8 @@
   "scripts": {
     "ng": "ng",
     "build": "yarn build-dev",
-    "build-dev": "ng build && cp ./src/electron-main.js ./dist",
-    "build-prod": "ng build --prod && cp ./src/electron-main.js ./dist",
+    "build-dev": "rimraf dist/ && ng build && cp ./src/electron-main.js ./dist",
+    "build-prod": "rimraf dist/ && ng build --prod && cp ./src/electron-main.js ./dist",
     "start": "electron .",
     "lint": "tslint \"src/**/*.ts\"",
     "test": "ng test",
@@ -51,6 +51,7 @@
     "karma-jasmine": "^1.0.2",
     "karma-remap-istanbul": "^0.2.1",
     "protractor": "~4.0.13",
+    "rimraf": "^2.5.4",
     "ts-node": "1.2.1",
     "tslint": "^4.0.2",
     "typescript": "~2.0.3"
