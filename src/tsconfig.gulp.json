@@ -5,7 +5,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": ["es6", "dom"],
-    "module": "es6",
+    "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "../dist/out-tsc",
     "target": "es5",
@@ -15,5 +15,8 @@
   },
   "files": [
     "electron-main.ts"
+  ],
+  "include": [
+    "mainprocess/**/*"
   ]
 }
