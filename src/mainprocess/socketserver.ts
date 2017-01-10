@@ -1,16 +1,20 @@
 const dgram = require('dgram');
 
+const { UdpCmdDispatcher } = require('./udpcmddispatcher');
+
 export class UdpServer {
   private server = null;
+  private dispacher = null;
 
   constructor() {
+    this.dispacher = new UdpCmdDispatcher();
     this.server = dgram.createSocket('udp4');
     this.init();
   }
 
   public startServer() {
     console.log('Start local UDP server...');
-    this.server.bind(41234);
+    this.server.bind(4555);
   }
 
   public stopServer() {
@@ -31,8 +35,13 @@ export class UdpServer {
   }
 
   private onServerMessage(msg, rinfo) {
-    console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-    this.server.send('Whatx', rinfo.port, rinfo.address);
+    // 4 bytes cmd version
+    // 4 bytes cmd
+    // rest bytes message of cmd
+    let ver = msg.readInt32BE(0);
+    let cmd = msg.readInt32BE(4);
+    let data = msg.slice(8);
+    this.dispacher.handleCmd(ver, cmd, data);
   }
 
   private onServerListening() {
