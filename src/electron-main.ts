@@ -7,16 +7,20 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 
-import { UdpServer } from './mainprocess/socketserver'
+import { UdpServer } from './mainprocess/udpserver'
+import { TcpServer } from './mainprocess/tcpserver'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
-let socketServer
+let udpServer
+let tcpServer
 
 function createWindow () {
-  socketServer = new UdpServer();
-  socketServer.startServer();
+  udpServer = new UdpServer();
+  udpServer.startServer();
+  tcpServer = new TcpServer();
+  tcpServer.startServer();
 
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})
@@ -52,8 +56,10 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-  socketServer.stopServer();
-  socketServer = null;
+  udpServer.stopServer();
+  udpServer = null;
+  tcpServer.stopServer();
+  tcpServer = null;
 })
 
 app.on('activate', function () {

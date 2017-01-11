@@ -7,13 +7,13 @@ const { config } = require('./network/definitions');
 const { NetUtils } = require('./utils/network/netutils');
 
 export class UdpServer {
-  private server = null;
+  private sock = null;
   private dispacher = null;
 
   constructor() {
-    this.server = dgram.createSocket('udp4');
+    this.sock = dgram.createSocket('udp4');
     this.init();
-    this.dispacher = new UdpCmdDispatcher(this.server);
+    this.dispacher = new UdpCmdDispatcher(this.sock);
 
     console.log('ip address:', NetUtils.getIpV4IpAddress());
     console.log('netmask address:', NetUtils.getIpV4Netmask());
@@ -22,24 +22,24 @@ export class UdpServer {
 
   public startServer() {
     console.log('Start local UDP server...');
-    this.server.bind(config.udp.port, this.onServerBind.bind(this));
+    this.sock.bind(config.udp.port, this.onServerBind.bind(this));
   }
 
   public stopServer() {
     console.log('Stop local UDP server...');
-    this.server.close();
-    this.server = null;
+    this.sock.close();
+    this.sock = null;
   }
 
   private init() {
-    this.server.on('error', this.onServerError.bind(this));
-    this.server.on('message', this.onServerMessage.bind(this));
-    this.server.on('listening', this.onServerListening.bind(this));
+    this.sock.on('error', this.onServerError.bind(this));
+    this.sock.on('message', this.onServerMessage.bind(this));
+    this.sock.on('listening', this.onServerListening.bind(this));
   }
 
   private onServerError(err) {
-    console.log(`server error:\n${err.stack}`);
-    this.server.close();
+    console.log(`udp server error:\n${err.stack}`);
+    this.sock.close();
   }
 
   private onServerMessage(msg, rinfo) {
@@ -53,12 +53,12 @@ export class UdpServer {
   }
 
   private onServerListening() {
-    let address = this.server.address();
-    console.log(`server listening ${address.address}:${address.port}`);
+    let address = this.sock.address();
+    console.log(`udp server listening ${address.address}:${address.port}`);
   }
 
   private onServerBind() {
-    this.server.setBroadcast(true);
+    this.sock.setBroadcast(true);
   }
 
 }
