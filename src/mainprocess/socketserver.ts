@@ -13,10 +13,11 @@ export class UdpServer {
   constructor() {
     this.server = dgram.createSocket('udp4');
     this.init();
-    this.dispacher = new UdpCmdDispatcher();
+    this.dispacher = new UdpCmdDispatcher(this.server);
 
-    console.log('netmask address:', NetUtils.getNetmask());
-    console.log('broadcast address:', NetUtils.getBroadcastAddress());
+    console.log('ip address:', NetUtils.getIpV4IpAddress());
+    console.log('netmask address:', NetUtils.getIpV4Netmask());
+    console.log('broadcast address:', NetUtils.getIpV4BroadcastAddress());
   }
 
   public startServer() {

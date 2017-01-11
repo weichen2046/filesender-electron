@@ -20,13 +20,19 @@ export class NetUtils {
     return addresses;
   }
 
-  public static getNetmask(): string|null {
+  public static getIpV4Netmask(): string|null {
     let addresses = NetUtils.getIpV4NetAddresses();
 
     return addresses.length > 0 ? addresses[0].netmask : null;
   }
 
-  public static getBroadcastAddress(): string|null {
+  public static getIpV4IpAddress(): string|null {
+    let addresses = NetUtils.getIpV4NetAddresses();
+
+    return addresses.length > 0 ? addresses[0].address : null;
+  }
+
+  public static getIpV4BroadcastAddress(): string|null {
     let addresses = NetUtils.getIpV4NetAddresses();
     if (addresses.length <= 0) {
       return null;
