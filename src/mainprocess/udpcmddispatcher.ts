@@ -1,15 +1,19 @@
 const { CmdPhoneOnline } = require('./udphandler/phoneonline');
+const { config } = require('./network/definitions');
 
 export class UdpCmdDispatcher {
-  constructor() {
+  private sock = null;
+
+  constructor(sock) {
+    this.sock = sock;
   }
 
   public handleCmd(dataVer: number, cmd: number, data): boolean {
     console.log(`handle cmd, data version: ${dataVer}, cmd: ${cmd}`);
     let res = true;
     switch(cmd) {
-      case 1: 
-	res = new CmdPhoneOnline().handle(data);
+      case config.cmd.phone.cmd_phone_online:
+	res = new CmdPhoneOnline(this.sock).handle(data);
     }
     return res;
   }

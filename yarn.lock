@@ -4241,6 +4241,10 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
+netmask@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/netmask/-/netmask-1.0.6.tgz#20297e89d86f6f6400f250d9f4f6b4c1945fcd35"
+
 no-case@^2.2.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-2.3.0.tgz#ca2825ccb76b18e6f79d573dcfbf1eace33dd164"

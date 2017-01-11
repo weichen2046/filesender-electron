@@ -2,19 +2,26 @@ const dgram = require('dgram');
 
 const { UdpCmdDispatcher } = require('./udpcmddispatcher');
 
+const { config } = require('./network/definitions');
+
+const { NetUtils } = require('./utils/network/netutils');
+
 export class UdpServer {
   private server = null;
   private dispacher = null;
 
   constructor() {
-    this.dispacher = new UdpCmdDispatcher();
     this.server = dgram.createSocket('udp4');
     this.init();
+    this.dispacher = new UdpCmdDispatcher();
+
+    console.log('netmask address:', NetUtils.getNetmask());
+    console.log('broadcast address:', NetUtils.getBroadcastAddress());
   }
 
   public startServer() {
     console.log('Start local UDP server...');
-    this.server.bind(4555);
+    this.server.bind(config.udp.port, this.onServerBind.bind(this));
   }
 
   public stopServer() {
@@ -47,6 +54,10 @@ export class UdpServer {
   private onServerListening() {
     let address = this.server.address();
     console.log(`server listening ${address.address}:${address.port}`);
+  }
+
+  private onServerBind() {
+    this.server.setBroadcast(true);
   }
 
 }

@@ -4,5 +4,12 @@
 // The list of which env maps to which file can be found in `angular-cli.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  udpconfig: {
+    port: 4555
+  },
+  tcpconfig: {
+    dataVer: 1,
+    port: 6852
+  }
 };
