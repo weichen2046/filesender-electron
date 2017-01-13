@@ -2,6 +2,7 @@ const os = require('os');
 const { Netmask } = require('netmask');
 
 export class NetUtils {
+
   public static getIpV4NetAddresses() {
     let interfaces = os.networkInterfaces();
     let addresses = [];

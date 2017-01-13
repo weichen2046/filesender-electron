@@ -33,6 +33,7 @@
     "core-js": "^2.4.1",
     "electron": "^1.4.13",
     "netmask": "^1.0.6",
+    "node-int64": "^0.4.0",
     "rxjs": "^5.0.1",
     "ts-helpers": "^1.1.1",
     "zone.js": "^0.7.2"
@@ -43,6 +44,7 @@
     "@types/electron": "^1.4.30",
     "@types/jasmine": "2.5.38",
     "@types/node": "^6.0.42",
+    "@types/node-int64": "^0.4.28",
     "angular-cli": "1.0.0-beta.24",
     "codelyzer": "~2.0.0-beta.1",
     "electron-packager": "^8.4.0",

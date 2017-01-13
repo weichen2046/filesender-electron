@@ -1,6 +1,8 @@
 const net = require('net');
 
 const { config } = require('./network/definitions');
+const { NetUtils } = require('./utils/network/netutils');
+const { TcpCmdDispatcher } = require('./tcpcmddispatcher');
 
 export class TcpServer {
   private server = null;
@@ -12,7 +14,12 @@ export class TcpServer {
 
   public startServer() {
     console.log('Start local TCP server...');
-    this.server.listen(config.tcp.port);
+    let ipAddr = NetUtils.getIpV4IpAddress();
+    if (ipAddr === null) {
+      console.log('TCP server can not listen for null ip');
+      return;
+    }
+    this.server.listen(config.tcp.port, ipAddr);
   }
 
   public stopServer() {
@@ -43,9 +50,18 @@ export class TcpServer {
     this.server = null;
   }
 
-  private onClientConnected(clientSock) {
-    console.log(`client connected, address: ${clientSock.address()}`);
-    clientSock.end();
+  private onClientConnected(sock) {
+    console.log(`client connected, remote port: ${sock.remotePort}, remote family: ${sock.remoteFamily}, address: ${sock.remoteAddress}`);
+    let tcpDispatcher = new TcpCmdDispatcher();
+    sock.on('data', (data) => {
+      console.log('received client data, length:', data.length);
+      tcpDispatcher.handle(data);
+    });
+
+    sock.on('end', () => {
+      console.log(`client closed, remote port: ${sock.remotePort}, remote family: ${sock.remoteFamily}, address: ${sock.remoteAddress}`);
+      tcpDispatcher.end();
+    });
   }
 
 }
