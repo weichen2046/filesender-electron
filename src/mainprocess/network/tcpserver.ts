@@ -1,7 +1,7 @@
 const net = require('net');
 
-const { config } = require('./network/definitions');
-const { NetUtils } = require('./utils/network/netutils');
+const { config } = require('./definitions');
+const { NetUtils } = require('../utils/network/netutils');
 const { TcpCmdDispatcher } = require('./tcpcmddispatcher');
 
 export class TcpServer {

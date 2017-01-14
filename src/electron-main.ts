@@ -7,8 +7,8 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 
-import { UdpServer } from './mainprocess/udpserver'
-import { TcpServer } from './mainprocess/tcpserver'
+import { UdpServer } from './mainprocess/network/udpserver'
+import { TcpServer } from './mainprocess/network/tcpserver'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

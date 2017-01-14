@@ -1,5 +1,5 @@
-const { BufferUtil } = require('./utils/buffer');
-const { config } = require('./network/definitions');
+const { BufferUtil } = require('../utils/buffer');
+const { config } = require('./definitions');
 const { CmdSendFile } = require('./tcphandler/sendfile');
 
 export class TcpCmdDispatcher {

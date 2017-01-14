@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { BufferUtil } = require('../utils/buffer');
+const { BufferUtil } = require('../../utils/buffer');
 const Int64 = require('node-int64');
 
 export class CmdSendFile {

@@ -1,10 +1,8 @@
 const dgram = require('dgram');
 
+const { config } = require('./definitions');
+const { NetUtils } = require('../utils/network/netutils');
 const { UdpCmdDispatcher } = require('./udpcmddispatcher');
-
-const { config } = require('./network/definitions');
-
-const { NetUtils } = require('./utils/network/netutils');
 
 export class UdpServer {
   private sock = null;

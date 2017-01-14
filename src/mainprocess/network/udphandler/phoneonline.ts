@@ -1,5 +1,5 @@
-const { NetUtils } = require('../utils/network/netutils');
-const { config } = require('../network/definitions');
+const { NetUtils } = require('../../utils/network/netutils');
+const { config } = require('../definitions');
 
 export class CmdPhoneOnline {
   private sock = null;
