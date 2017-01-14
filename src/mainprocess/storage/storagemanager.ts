@@ -12,7 +12,7 @@ export class StorageManager {
     return path.join(userHome, 'filesender', 'received');
   }
 
-  public static getDefaultStoreDir(mkdirs: boolean) {
+  public static getDefaultStoreDir(mkdirs: boolean): string {
     let now = new Date();
     let year = now.getFullYear().toString();
     let month = (now.getMonth() + 1).toString();
@@ -26,6 +26,22 @@ export class StorageManager {
 
   public static getDefaultStorePath(filename: string): string {
     let defaultStoreDir = StorageManager.getDefaultStoreDir(true);
-    return path.join(defaultStoreDir, filename);
+    let finalPath = path.join(defaultStoreDir, filename);
+    while (fs.existsSync(finalPath)) {
+      let parseRes = path.parse(filename);
+      let name = parseRes.name;
+      let ext = parseRes.ext;
+      let patt = /\((\d+)\)$/;
+      let match = name.match(patt);
+      if (match) {
+        let count = +match[1] + 1;
+        filename = name.replace(patt, `(${count})`);
+        filename = `${filename}${ext}`;
+      } else {
+        filename = `${name}(1)${ext}`;
+      }
+      finalPath = path.join(defaultStoreDir, filename);
+    }
+    return finalPath;
   }
 }
