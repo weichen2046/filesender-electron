@@ -1,6 +1,8 @@
 const fs = require('fs');
-const { BufferUtil } = require('../../utils/buffer');
 const Int64 = require('node-int64');
+
+const { BufferUtil } = require('../../utils/buffer');
+const { StorageManager } = require('../../storage/storagemanager');
 
 export class CmdSendFile {
   private innerHandler = null;
@@ -136,7 +138,7 @@ export class CmdSendFile {
 
   private fileContentParser(data) {
     if (this.recvFileLen == 0) {
-      this.recvFd = fs.openSync(this.fileName, 'wx');
+      this.recvFd = fs.openSync(StorageManager.getDefaultStorePath(this.fileName), 'wx');
       //console.log(`first write data, length: ${data.length}, recv fd: ${this.recvFd}`);
       fs.writeSync(this.recvFd, data, 0, data.length);
     } else {
