@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { BufferUtil } = require('../utils/buffer');
 const Int64 = require('node-int64');
 
@@ -13,6 +14,7 @@ export class CmdSendFile {
   private fileNameLen = 0;
   private fileContentLen = 0;
   private recvFileLen = 0;
+  private recvFd = null;
 
   constructor(dataVer) {
     this.dataVer = dataVer;
@@ -38,7 +40,11 @@ export class CmdSendFile {
       this.innerHandler.end();
     }
     console.log(`all received file content length: ${this.recvFileLen}`);
-    // TODO: close file
+    if (this.recvFd != null) {
+      //console.log(`close fd: ${this.recvFd}`);
+      fs.closeSync(this.recvFd);
+      this.recvFd = null;
+    }
   }
 
   // private methods
@@ -130,7 +136,12 @@ export class CmdSendFile {
 
   private fileContentParser(data) {
     if (this.recvFileLen == 0) {
-      // TODO: create file
+      this.recvFd = fs.openSync(this.fileName, 'wx');
+      //console.log(`first write data, length: ${data.length}, recv fd: ${this.recvFd}`);
+      fs.writeSync(this.recvFd, data, 0, data.length);
+    } else {
+      //console.log(`write data, length: ${data.length}`);
+      fs.writeSync(this.recvFd, data, 0, data.length);
     }
 
     if (data != null) {

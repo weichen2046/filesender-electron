@@ -54,7 +54,7 @@ export class TcpServer {
     console.log(`client connected, remote port: ${sock.remotePort}, remote family: ${sock.remoteFamily}, address: ${sock.remoteAddress}`);
     let tcpDispatcher = new TcpCmdDispatcher();
     sock.on('data', (data) => {
-      console.log('received client data, length:', data.length);
+      //console.log('received client data, length:', data.length);
       tcpDispatcher.handle(data);
     });
 
