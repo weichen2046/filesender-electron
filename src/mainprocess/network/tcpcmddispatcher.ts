@@ -1,6 +1,7 @@
 const { BufferUtil } = require('../utils/buffer');
 const { config } = require('./definitions');
 const { CmdSendFile } = require('./tcphandler/sendfile');
+const { CmdSendFileRequest } = require('./tcphandler/sendfilerequest');
 
 export class TcpCmdDispatcher {
   private innerHandler = null;
@@ -98,10 +99,16 @@ export class TcpCmdDispatcher {
     switch(cmd) {
       case config.cmd.phone.cmd_send_file:
         this.innerHandler = new CmdSendFile(this.dataVer);
-        this.innerHandler.handle(data);
+        break;
+      case config.cmd.phone.cmd_send_file_request:
+        this.innerHandler = new CmdSendFileRequest(this.dataVer);
         break;
       default:
         console.log(`unknown cmd to dispatch cmd: ${cmd}`);
+    }
+
+    if (this.innerHandler) {
+      this.innerHandler.handle(data);
     }
   }
 
