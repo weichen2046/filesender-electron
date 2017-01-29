@@ -1,7 +1,10 @@
+const { app } = require('electron');
+const { config } = require('../definitions');
+const dgram = require('dgram');
 const fs = require('fs');
 const Int64 = require('node-int64');
-const notifier = require('node-notifier')
-const { app } = require('electron')
+const notifier = require('node-notifier');
+const { NetUtils } = require('../../utils/network/netutils');
 
 const { BufferUtil } = require('../../utils/buffer');
 const { StorageManager } = require('../../storage/storagemanager');
@@ -31,7 +34,7 @@ export class CmdSendFileRequest {
       //console.log('this stateIndex:', this.stateIndex);
       if (this.stateIndex < this.states.length) {
         let state = this.states[this.stateIndex];
-        let res = state.handle(data, state);
+        let res = this.parseData(data, state);
 	if (res) {
 	  this.stateIndex += 1;
 	  this.handle(null);
@@ -66,31 +69,35 @@ export class CmdSendFileRequest {
     this.stateIndex = 0;
     this.states.push({
       handle: this.fileNameLengthParser.bind(this),
-      expectLen: 4,
-      end: ''
+      expectLen: () => { return 4; }
     });
     this.states.push({
       handle: this.fileNameParser.bind(this),
-      end: ''
+      expectLen: () => { return this.fileNameLen; }
     });
     this.states.push({
       handle: this.hasThumbnailParser.bind(this),
-      expectLen: 1,
-      end: ''
+      expectLen: () => { return 1; }
     });
     this.states.push({
       handle: this.thumbnailLengthParser.bind(this),
-      expectLen: 8,
-      end: ''
+      expectLen: () => { return 8; },
+      ignore: () => { return !this.hasThumbnail; }
     });
     this.states.push({
       handle: this.thumbnailParser.bind(this),
-      end: ''
+      ignore: () => { return !this.hasThumbnail; }
     });
   }
 
-  private fileNameLengthParser(data, state) {
-    let expectLen = state.expectLen;
+  private parseData(data, state): boolean {
+    if (state.ignore !== undefined && state.ignore()) {
+      //console.log('ignored state parse');
+      return true;
+    }
+
+    let expectLen = state.expectLen !== undefined ? state.expectLen() : 0;
+    //console.log('expect length:', expectLen);
     let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
     if (availableData == null) {
       console.log('no available data to parse');
@@ -98,97 +105,45 @@ export class CmdSendFileRequest {
     }
 
     if (availableData.length >= expectLen) {
-      this.fileNameLen = availableData.readInt32BE(0);
-      console.log(`read file name length: ${this.fileNameLen}`);
+      let res = state.handle(availableData, state);
       if (availableData.length == expectLen) {
         this.remainderData = null;
       } else {
         this.remainderData = availableData.slice(expectLen);
       }
-      return true;
+      return res;
     } else {
       this.remainderData = availableData;
     }
     return false;
+  }
+
+  private fileNameLengthParser(data, state, expectLen) {
+    this.fileNameLen = data.readInt32BE(0);
+    console.log(`read file name length: ${this.fileNameLen}`);
+    return true;
   }
 
   private fileNameParser(data, state) {
-    let expectLen = this.fileNameLen;
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return false;
-    }
-
-    if (availableData.length >= expectLen) {
-      this.fileName = availableData.toString('utf8', 0, expectLen);
-      console.log(`read file name: ${this.fileName}`);
-      if (availableData.length == expectLen) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(expectLen);
-      }
-      return true;
-    } else {
-      this.remainderData = availableData;
-    }
-    return false;
+    this.fileName = data.toString('utf8', 0, this.fileNameLen);
+    console.log(`read file name: ${this.fileName}`);
+    return true;
   }
 
   private hasThumbnailParser(data, state) {
-    let expectLen = state.expectLen;
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return false;
-    }
-
-    if (availableData.length >= expectLen) {
-      this.hasThumbnail = availableData.readInt8(0) == 1;
-      console.log(`read has thumbnail: ${this.hasThumbnail}`);
-      if (availableData.length == expectLen) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(expectLen);
-      }
-      return true;
-    } else {
-      this.remainderData = availableData;
-    }
-    return false;
+    this.hasThumbnail = data.readInt8(0) == 1;
+    console.log(`read has thumbnail: ${this.hasThumbnail}`);
+    return true;
   }
 
   private thumbnailLengthParser(data, state) {
-    if (!this.hasThumbnail) {
-      return true;
-    }
-    let expectLen = state.expectLen;
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return false;
-    }
-
-    if (availableData.length >= expectLen) {
-      let int64 = new Int64(availableData, 0);
-      this.thumbnailLen = int64.toNumber(true);
-      console.log(`read thumbnail length: ${this.thumbnailLen}`);
-      if (availableData.length == expectLen) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(expectLen);
-      }
-      return true;
-    } else {
-      this.remainderData = availableData;
-    }
-    return false;
+    let int64 = new Int64(data, 0);
+    this.thumbnailLen = int64.toNumber(true);
+    console.log(`read thumbnail length: ${this.thumbnailLen}`);
+    return true;
   }
 
   private thumbnailParser(data, state) {
-    if (!this.hasThumbnail) {
-      return true;
-    }
     if (this.recvThumbnailLen == 0) {
       this.recvThumbnailFd = fs.openSync(StorageManager.getDefaultStorePath(this.getThumbnailName()), 'wx');
       //console.log(`first write data, length: ${data.length}, recv fd: ${this.recvFd}`);
@@ -211,7 +166,6 @@ export class CmdSendFileRequest {
 
   private allDataRecvedHandler() {
     if (process.platform == 'darwin') {
-      console.log('darwin nofication center, curr path:', app.getAppPath());
       new notifier.NotificationCenter().notify({
 	title: 'File receive confirm?',
 	message: this.fileName,
@@ -223,9 +177,10 @@ export class CmdSendFileRequest {
 	timeout: 10
       }, (err, resp, metadata) => {
 	if (metadata.activationValue === 'Ok') {
-	  // TODO: send confirm
-	  console.log('send confirm to phone');
+	  this.sendRecvConfirm();
+	  return;
 	}
+	this.sendRecvConfirm(false);
       });
     } else {
       console.log('other os nofication');
@@ -234,5 +189,44 @@ export class CmdSendFileRequest {
 	message: this.fileName
       });
     }
+  }
+
+  private sendRecvConfirm(yes: boolean = true) {
+    console.log('send confirm to phone:', yes);
+
+    // TODO: get phone UDP listen port by ip address
+    if (!config.phoneUdpPort) {
+      console.log('has no phone UDP listen port');
+      return;
+    }
+
+    let broadcastAddr = NetUtils.getIpV4BroadcastAddress();
+    if (broadcastAddr === null) {
+      console.log('Can not report PC info for broadcast address is null');
+      return;
+    }
+
+    let client = dgram.createSocket('udp4');
+    client.bind(() => {
+      client.setBroadcast(true);
+    });
+
+    // 4 bytes data version
+    // 4 bytes cmd
+    // other bytes cmd data
+    let dataLen = 4 + 4 + 4;
+    let buffOffset = 0;
+    let msg = Buffer.alloc(dataLen);
+    msg.writeInt32BE(config.tcp.dataVer, buffOffset);
+    buffOffset += 4;
+    msg.writeInt32BE(config.cmd.pc.cmd_confirm_recv_file, buffOffset);
+    buffOffset += 4;
+    // TODO: write confirmed file identity
+    msg.writeInt32BE(config.tcp.port, buffOffset);
+    console.log(`send file receive confirm, port: ${config.phoneUdpPort}, broadcast address: ${broadcastAddr}`);
+    client.send(msg, config.phoneUdpPort, broadcastAddr, (err) => {
+      console.log('udp send finished close sock');
+      client.close();
+    });
   }
 }

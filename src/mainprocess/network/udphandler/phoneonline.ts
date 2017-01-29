@@ -10,6 +10,7 @@ export class CmdPhoneOnline {
 
   public handle(data): boolean {
     let phoneUdpPort = data.readInt32BE();
+    config.phoneUdpPort = phoneUdpPort;
     this.reportPcOnline(phoneUdpPort);
     return true;
   }
