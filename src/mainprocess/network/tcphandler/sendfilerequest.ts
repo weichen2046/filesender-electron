@@ -5,54 +5,28 @@ const fs = require('fs');
 const Int64 = require('node-int64');
 const notifier = require('node-notifier');
 const { NetUtils } = require('../../utils/network/netutils');
-
-const { BufferUtil } = require('../../utils/buffer');
 const { StorageManager } = require('../../storage/storagemanager');
 
-export class CmdSendFileRequest {
-  private innerHandler = null;
-  private remainderData = null;
-  private stateIndex = 0;
-  private states = [];
+import { TcpCmdHandler } from '../tcpcmdhandler';
 
-  private dataVer = -1;
-
+export class CmdSendFileRequest extends TcpCmdHandler {
   private fileName = null;
   private fileNameLen = 0;
+  private fileId = -1;
   private hasThumbnail = false;
   private thumbnailLen = 0;
   private recvThumbnailLen = 0;
   private recvThumbnailFd = null;
 
   constructor(dataVer) {
+    super();
     this.dataVer = dataVer;
     this.initStates();
   }
 
-  public handle(data) {
-    if (this.innerHandler == null) {
-      //console.log('this stateIndex:', this.stateIndex);
-      if (this.stateIndex < this.states.length) {
-        let state = this.states[this.stateIndex];
-        let res = this.parseData(data, state);
-	if (res) {
-	  this.stateIndex += 1;
-	  this.handle(null);
-	}
-      } else if (this.stateIndex == this.states.length) {
-	this.allDataRecvedHandler();
-      } else {
-        console.log(`index out of states array, curr index: ${this.stateIndex}, states array length: ${this.states.length}`);
-      }
-    } else {
-      this.innerHandler.handle(data);
-    }
-  }
-
   public end() {
-    if (this.innerHandler != null) {
-      this.innerHandler.end();
-    }
+    super.end();
+    //console.log('CmdSendFileRequest end called');
     if (this.hasThumbnail) {
       console.log(`all received thumbnail length: ${this.recvThumbnailLen}`);
       if (this.recvThumbnailFd != null) {
@@ -63,10 +37,8 @@ export class CmdSendFileRequest {
     }
   }
 
-  // private methods
-
-  private initStates() {
-    this.stateIndex = 0;
+  protected initStates() {
+    super.initStates();
     this.states.push({
       handle: this.fileNameLengthParser.bind(this),
       expectLen: () => { return 4; }
@@ -74,6 +46,10 @@ export class CmdSendFileRequest {
     this.states.push({
       handle: this.fileNameParser.bind(this),
       expectLen: () => { return this.fileNameLen; }
+    });
+    this.states.push({
+      handle: this.fileIdParser.bind(this),
+      expectLen: () => { return 8; }
     });
     this.states.push({
       handle: this.hasThumbnailParser.bind(this),
@@ -90,81 +66,8 @@ export class CmdSendFileRequest {
     });
   }
 
-  private parseData(data, state): boolean {
-    if (state.ignore !== undefined && state.ignore()) {
-      //console.log('ignored state parse');
-      return true;
-    }
-
-    let expectLen = state.expectLen !== undefined ? state.expectLen() : 0;
-    //console.log('expect length:', expectLen);
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return false;
-    }
-
-    if (availableData.length >= expectLen) {
-      let res = state.handle(availableData, state);
-      if (availableData.length == expectLen) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(expectLen);
-      }
-      return res;
-    } else {
-      this.remainderData = availableData;
-    }
-    return false;
-  }
-
-  private fileNameLengthParser(data, state, expectLen) {
-    this.fileNameLen = data.readInt32BE(0);
-    console.log(`read file name length: ${this.fileNameLen}`);
-    return true;
-  }
-
-  private fileNameParser(data, state) {
-    this.fileName = data.toString('utf8', 0, this.fileNameLen);
-    console.log(`read file name: ${this.fileName}`);
-    return true;
-  }
-
-  private hasThumbnailParser(data, state) {
-    this.hasThumbnail = data.readInt8(0) == 1;
-    console.log(`read has thumbnail: ${this.hasThumbnail}`);
-    return true;
-  }
-
-  private thumbnailLengthParser(data, state) {
-    let int64 = new Int64(data, 0);
-    this.thumbnailLen = int64.toNumber(true);
-    console.log(`read thumbnail length: ${this.thumbnailLen}`);
-    return true;
-  }
-
-  private thumbnailParser(data, state) {
-    if (this.recvThumbnailLen == 0) {
-      this.recvThumbnailFd = fs.openSync(StorageManager.getDefaultStorePath(this.getThumbnailName()), 'wx');
-      //console.log(`first write data, length: ${data.length}, recv fd: ${this.recvFd}`);
-      fs.writeSync(this.recvThumbnailFd, data, 0, data.length);
-    } else {
-      //console.log(`write data, length: ${data.length}`);
-      fs.writeSync(this.recvThumbnailFd, data, 0, data.length);
-    }
-
-    if (data != null) {
-      this.recvThumbnailLen += data.length;
-    }
-
-    return this.recvThumbnailLen == this.thumbnailLen;
-  }
-
-  private getThumbnailName(): string {
-    return `thumbnail_${this.fileName}`;
-  }
-
-  private allDataRecvedHandler() {
+  protected allDataRecved() {
+    //console.log('CmdSendFileRequest allDataRecved called');
     if (process.platform == 'darwin') {
       new notifier.NotificationCenter().notify({
 	title: 'File receive confirm?',
@@ -189,6 +92,61 @@ export class CmdSendFileRequest {
 	message: this.fileName
       });
     }
+  }
+
+  // private methods
+
+  private fileNameLengthParser(data, state): boolean {
+    this.fileNameLen = data.readInt32BE(0);
+    console.log(`read file name length: ${this.fileNameLen}`);
+    return true;
+  }
+
+  private fileNameParser(data, state): boolean {
+    this.fileName = data.toString('utf8', 0, this.fileNameLen);
+    console.log(`read file name: ${this.fileName}`);
+    return true;
+  }
+
+  private fileIdParser(data, state): boolean {
+    let int64 = new Int64(data, 0);
+    this.fileId = int64.toNumber(true);
+    console.log(`read file id: ${this.fileId}`);
+    return true;
+  }
+
+  private hasThumbnailParser(data, state): boolean {
+    this.hasThumbnail = data.readInt8(0) == 1;
+    console.log(`read has thumbnail: ${this.hasThumbnail}`);
+    return true;
+  }
+
+  private thumbnailLengthParser(data, state): boolean {
+    let int64 = new Int64(data, 0);
+    this.thumbnailLen = int64.toNumber(true);
+    console.log(`read thumbnail length: ${this.thumbnailLen}`);
+    return true;
+  }
+
+  private thumbnailParser(data, state): boolean {
+    if (this.recvThumbnailLen == 0) {
+      this.recvThumbnailFd = fs.openSync(StorageManager.getDefaultStorePath(this.getThumbnailName()), 'wx');
+      //console.log(`first write data, length: ${data.length}, recv fd: ${this.recvFd}`);
+      fs.writeSync(this.recvThumbnailFd, data, 0, data.length);
+    } else {
+      //console.log(`write data, length: ${data.length}`);
+      fs.writeSync(this.recvThumbnailFd, data, 0, data.length);
+    }
+
+    if (data != null) {
+      this.recvThumbnailLen += data.length;
+    }
+
+    return this.recvThumbnailLen == this.thumbnailLen;
+  }
+
+  private getThumbnailName(): string {
+    return `thumbnail_${this.fileName}`;
   }
 
   private sendRecvConfirm(yes: boolean = true) {

@@ -1,8 +1,8 @@
 export class BufferUtil {
-  public static mergeBuffers(buff1, buff2) {
+  public static mergeBuffers(buff1: Buffer, buff2: Buffer): Buffer|null {
     let mergedBuff = null;
     let mergedBuffLen = 0;
-    let buffArray = [];
+    let buffArray: Buffer[] = [];
     if (buff1 != null) {
       buffArray.push(buff1);
       mergedBuffLen += buff1.length;

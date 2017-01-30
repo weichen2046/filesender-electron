@@ -1,100 +1,46 @@
-const { BufferUtil } = require('../utils/buffer');
 const { config } = require('./definitions');
 const { CmdSendFile } = require('./tcphandler/sendfile');
 const { CmdSendFileRequest } = require('./tcphandler/sendfilerequest');
 
-export class TcpCmdDispatcher {
-  private innerHandler = null;
-  private remainderData = null;
-  private stateIndex = 0;
-  private states = [];
+import { TcpCmdHandler } from './tcpcmdhandler';
 
-  private dataVer = -1;
-  private cmd = -1;
-
+export class TcpCmdDispatcher extends TcpCmdHandler {
   constructor() {
+    super();
     this.initStates();
   }
 
-  public handle(data) {
-    if (this.innerHandler == null) {
-      //console.log(`current stateIndex: ${this.stateIndex}`);
-      if (this.stateIndex < this.states.length) {
-        let state = this.states[this.stateIndex];
-        state.handle(data);
-      } else {
-        console.log(`index out of states array, curr index: ${this.stateIndex}, states array length: ${this.states.length}`);
-      }
-    } else {
-      this.innerHandler.handle(data);
-    }
-  }
-
-  public end() {
-    if (this.innerHandler != null) {
-      this.innerHandler.end();
-    }
+  protected initStates() {
+    super.initStates();
+    this.states.push({
+      handle: this.dataVersionParser.bind(this),
+      expectLen: () => { return 4; }
+    });
+    this.states.push({
+      handle: this.cmdParser.bind(this),
+      expectLen: () => { return 4; }
+    });
+    this.states.push({
+      handle: this.dispatchCmd.bind(this)
+    });
   }
 
   // private methods
 
-  private initStates() {
-    this.stateIndex = 0;
-    this.states.push({
-      handle: this.dataVersionHandler.bind(this)
-    });
-    this.states.push({
-      handle: this.cmdHandler.bind(this)
-    });
+  private dataVersionParser(data, state) {
+    this.dataVer = data.readInt32BE(0);
+    console.log(`read tcp data version: ${this.dataVer}`);
+    return true;
   }
 
-  private dataVersionHandler(data) {
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return;
-    }
-
-    if (availableData.length >= 4) {
-      this.dataVer = availableData.readInt32BE(0);
-      console.log(`read tcp data version: ${this.dataVer}`);
-      this.stateIndex += 1;
-      if (availableData.length == 4) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(4);
-        this.handle(null);
-      }
-    } else {
-      this.remainderData = availableData;
-    }
+  private cmdParser(data, state) {
+    this.cmd = data.readInt32BE(0);
+    console.log(`read tcp cmd: ${this.cmd}`);
+    return true;
   }
 
-  private cmdHandler(data) {
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return;
-    }
-
-    if (availableData.length >= 4) {
-      this.cmd = availableData.readInt32BE(0);
-      console.log(`read tcp cmd: ${this.cmd}`);
-      this.stateIndex += 1;
-      if (availableData.length == 4) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(4);
-      }
-      this.dispatchCmd(this.cmd, this.remainderData);
-      // clear remainderData reference
-      this.remainderData = null;
-    } else {
-      this.remainderData = availableData;
-    }
-  }
-
-  private dispatchCmd(cmd, data) {
+  private dispatchCmd(data, state): boolean {
+    let cmd = this.cmd;
     console.log(`dispach cmd: ${cmd}`);
     switch(cmd) {
       case config.cmd.phone.cmd_send_file:
@@ -110,6 +56,7 @@ export class TcpCmdDispatcher {
     if (this.innerHandler) {
       this.innerHandler.handle(data);
     }
-  }
 
+    return false;
+  }
 }
