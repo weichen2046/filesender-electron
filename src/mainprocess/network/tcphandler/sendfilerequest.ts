@@ -167,24 +167,26 @@ export class CmdSendFileRequest extends TcpCmdHandler {
     let client = dgram.createSocket('udp4');
     client.bind(() => {
       client.setBroadcast(true);
-    });
-
-    // 4 bytes data version
-    // 4 bytes cmd
-    // other bytes cmd data
-    let dataLen = 4 + 4 + 4;
-    let buffOffset = 0;
-    let msg = Buffer.alloc(dataLen);
-    msg.writeInt32BE(config.tcp.dataVer, buffOffset);
-    buffOffset += 4;
-    msg.writeInt32BE(config.cmd.pc.cmd_confirm_recv_file, buffOffset);
-    buffOffset += 4;
-    // TODO: write confirmed file identity
-    msg.writeInt32BE(config.tcp.port, buffOffset);
-    console.log(`send file receive confirm, port: ${config.phoneUdpPort}, broadcast address: ${broadcastAddr}`);
-    client.send(msg, config.phoneUdpPort, broadcastAddr, (err) => {
-      console.log('udp send finished close sock');
-      client.close();
+      // 4 bytes data version
+      // 4 bytes cmd
+      // 1 bytes yes/no
+      // 8 bytes file id
+      let dataLen = 4 + 4 + 1 + 8;
+      let buffOffset = 0;
+      let msg = Buffer.alloc(dataLen);
+      msg.writeInt32BE(config.tcp.dataVer, buffOffset);
+      buffOffset += 4;
+      msg.writeInt32BE(config.cmd.pc.cmd_confirm_recv_file, buffOffset);
+      buffOffset += 4;
+      msg.writeInt8(yes ? 1 : 0, buffOffset);
+      buffOffset += 1;
+      // write confirmed file identity
+      msg.fill(new Int64(this.fileId).toBuffer(), buffOffset);
+      //console.log(`send file receive confirm, port: ${config.phoneUdpPort}, broadcast address: ${broadcastAddr}`);
+      client.send(msg, config.phoneUdpPort, broadcastAddr, (err) => {
+	//console.log('udp send finished close sock');
+	client.close();
+      });
     });
   }
 }
