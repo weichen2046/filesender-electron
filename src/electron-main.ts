@@ -13,8 +13,19 @@ import { TcpServer } from './mainprocess/network/tcpserver'
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
-let udpServer
-let tcpServer
+let udpServer = null;
+let tcpServer = null;
+
+function stopNetworkServer() {
+  if (udpServer !== null) {
+    udpServer.stopServer();
+    udpServer = null;
+  }
+  if (tcpServer !== null) {
+    tcpServer.stopServer();
+    tcpServer = null;
+  }
+}
 
 function createWindow () {
   udpServer = new UdpServer();
@@ -56,10 +67,7 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-  udpServer.stopServer();
-  udpServer = null;
-  tcpServer.stopServer();
-  tcpServer = null;
+  stopNetworkServer();
 })
 
 app.on('activate', function () {
@@ -68,6 +76,10 @@ app.on('activate', function () {
   if (mainWindow === null) {
     createWindow()
   }
+})
+
+app.on('quit', () => {
+  stopNetworkServer();
 })
 
 // In this file you can include the rest of your app's specific main process

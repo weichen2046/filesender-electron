@@ -46,7 +46,7 @@ export class TcpServer {
   }
 
   private onServerClosed() {
-    console.log('tp server closed');
+    console.log('tcp server closed');
     this.server = null;
   }
 
