@@ -1,4 +1,4 @@
-const { config } = require('./definitions');
+const { config } = require('./config');
 const { CmdSendFile } = require('./tcphandler/sendfile');
 const { CmdSendFileRequest } = require('./tcphandler/sendfilerequest');
 

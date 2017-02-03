@@ -1,5 +1,5 @@
 const { CmdPhoneOnline } = require('./udphandler/phoneonline');
-const { config } = require('./definitions');
+const { config } = require('./config');
 
 export class UdpCmdDispatcher {
   private sock = null;

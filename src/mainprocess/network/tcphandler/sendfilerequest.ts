@@ -1,5 +1,5 @@
 const { app } = require('electron');
-const { config } = require('../definitions');
+const { config } = require('../config');
 const dgram = require('dgram');
 const fs = require('fs');
 const Int64 = require('node-int64');

@@ -1,6 +1,6 @@
 const dgram = require('dgram');
 
-const { config } = require('./definitions');
+const { config } = require('./config');
 const { NetUtils } = require('../utils/network/netutils');
 const { UdpCmdDispatcher } = require('./udpcmddispatcher');
 

@@ -1,4 +1,5 @@
 import { NetworkServerCallback } from './networkservercallback';
+import { DesktopCmds } from './network/desktop/desktopcmds';
 
 export class LifeCycleHooks implements NetworkServerCallback {
   private startedServerCount: number = 0;
@@ -12,10 +13,12 @@ export class LifeCycleHooks implements NetworkServerCallback {
 
   public onNetworkServersStarted() {
     console.log('lifecycle onNetworkServersStarted');
+    DesktopCmds.broadcastDesktopOnline();
   }
 
   public onNetworkServersStopped() {
     console.log('lifecycle onNetworkServersStopped');
+    DesktopCmds.broadcastDesktopOffline();
   }
 
   // onAppQuit() may comes after onNetworkServersStopped()

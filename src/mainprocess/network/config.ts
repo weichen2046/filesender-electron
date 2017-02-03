@@ -21,5 +21,8 @@ export const config = {
   udp: {
     dataVer: 1,
     port: 4555
+  },
+  mobile: {
+    default_udp_port: 4556
   }
 }
