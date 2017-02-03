@@ -1,6 +1,7 @@
 const { NetUtils } = require('../../utils/network/netutils');
 const { config } = require('../definitions');
 
+// Handle mobile device online command from mobile device.
 export class CmdPhoneOnline {
   private sock = null;
 

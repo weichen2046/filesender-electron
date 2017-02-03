@@ -4,11 +4,13 @@ const { config } = require('./definitions');
 const { NetUtils } = require('../utils/network/netutils');
 const { UdpCmdDispatcher } = require('./udpcmddispatcher');
 
+import { NetworkServerCallback } from '../networkservercallback';
+
 export class UdpServer {
   private sock = null;
   private dispacher = null;
 
-  constructor() {
+  constructor(private callback: NetworkServerCallback) {
     this.sock = dgram.createSocket('udp4');
     this.init();
     this.dispacher = new UdpCmdDispatcher(this.sock);
@@ -33,6 +35,7 @@ export class UdpServer {
     this.sock.on('error', this.onServerError.bind(this));
     this.sock.on('message', this.onServerMessage.bind(this));
     this.sock.on('listening', this.onServerListening.bind(this));
+    this.sock.on('close', this.onServerClosed.bind(this));
   }
 
   private onServerError(err) {
@@ -53,10 +56,15 @@ export class UdpServer {
   private onServerListening() {
     let address = this.sock.address();
     console.log(`udp server listening ${address.address}:${address.port}`);
+    this.callback.onServerStarted();
   }
 
   private onServerBind() {
     this.sock.setBroadcast(true);
   }
 
+  private onServerClosed() {
+    console.log('udp server closed');
+    this.callback.onServerStopped();
+  }
 }

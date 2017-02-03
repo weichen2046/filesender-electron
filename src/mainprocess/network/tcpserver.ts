@@ -4,10 +4,12 @@ const { config } = require('./definitions');
 const { NetUtils } = require('../utils/network/netutils');
 const { TcpCmdDispatcher } = require('./tcpcmddispatcher');
 
+import { NetworkServerCallback } from '../networkservercallback';
+
 export class TcpServer {
   private server = null;
 
-  constructor() {
+  constructor(private callback: NetworkServerCallback) {
     this.server = net.createServer();
     this.initServer();
   }
@@ -43,11 +45,13 @@ export class TcpServer {
   private onServerListening() {
     let address = this.server.address();
     console.log(`tcp server listening, port: ${address.port}, family: ${address.family}, address: ${address.address}`);
+    this.callback.onServerStarted();
   }
 
   private onServerClosed() {
     console.log('tcp server closed');
     this.server = null;
+    this.callback.onServerStopped();
   }
 
   private onClientConnected(sock) {

@@ -4,6 +4,7 @@ const Int64 = require('node-int64');
 const { BufferUtil } = require('../../utils/buffer');
 const { StorageManager } = require('../../storage/storagemanager');
 
+// Handle send file command from mobile device.
 export class CmdSendFile {
   private innerHandler = null;
   private remainderData = null;

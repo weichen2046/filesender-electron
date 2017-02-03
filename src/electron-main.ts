@@ -7,16 +7,26 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 
-import { UdpServer } from './mainprocess/network/udpserver'
-import { TcpServer } from './mainprocess/network/tcpserver'
+import { UdpServer } from './mainprocess/network/udpserver';
+import { TcpServer } from './mainprocess/network/tcpserver';
+import { LifeCycleHooks } from './mainprocess/lifecycle';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 let udpServer = null;
 let tcpServer = null;
+let lifecycle = new LifeCycleHooks(2);
 
-function stopNetworkServer() {
+function startNetworkServers() {
+  stopNetworkServers();
+  udpServer = new UdpServer(lifecycle);
+  udpServer.startServer();
+  tcpServer = new TcpServer(lifecycle);
+  tcpServer.startServer();
+}
+
+function stopNetworkServers() {
   if (udpServer !== null) {
     udpServer.stopServer();
     udpServer = null;
@@ -28,10 +38,7 @@ function stopNetworkServer() {
 }
 
 function createWindow () {
-  udpServer = new UdpServer();
-  udpServer.startServer();
-  tcpServer = new TcpServer();
-  tcpServer.startServer();
+  startNetworkServers();
 
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})
@@ -67,7 +74,7 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-  stopNetworkServer();
+  stopNetworkServers();
 })
 
 app.on('activate', function () {
@@ -79,7 +86,8 @@ app.on('activate', function () {
 })
 
 app.on('quit', () => {
-  stopNetworkServer();
+  stopNetworkServers();
+  lifecycle.onAppQuit();
 })
 
 // In this file you can include the rest of your app's specific main process

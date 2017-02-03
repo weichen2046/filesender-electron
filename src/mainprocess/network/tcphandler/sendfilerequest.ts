@@ -9,6 +9,7 @@ const { StorageManager } = require('../../storage/storagemanager');
 
 import { TcpCmdHandler } from '../tcpcmdhandler';
 
+// Handle send file request command from mobile device.
 export class CmdSendFileRequest extends TcpCmdHandler {
   private fileName = null;
   private fileNameLen = 0;
@@ -186,6 +187,7 @@ export class CmdSendFileRequest extends TcpCmdHandler {
       client.send(msg, config.phoneUdpPort, broadcastAddr, (err) => {
 	//console.log('udp send finished close sock');
 	client.close();
+	client = null;
       });
     });
   }
