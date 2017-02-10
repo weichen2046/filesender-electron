@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { MaterialModule } from '@angular/material';
 
 // bottomstatusbar
 import { BottomStatusBarComponent } from './bottomstatusbar/index';
@@ -23,7 +24,9 @@ import { ToolsBarComponent } from './toolsbar/index';
     TabContentComponent,
     ToolsBarComponent
   ],
-  imports: [],
+  imports: [
+    MaterialModule,
+  ],
   providers: [],
   exports: [
     BottomStatusBarComponent,
