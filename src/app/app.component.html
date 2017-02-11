@@ -1,3 +1,5 @@
-<toolsbar></toolsbar>
-<contentview></contentview>
-<bottomstatusbar></bottomstatusbar>
+<div [class.debug-theme]="!envConfig.production" class="theme-wrapper">
+  <toolsbar></toolsbar>
+  <contentview></contentview>
+  <bottomstatusbar></bottomstatusbar>
+</div>

@@ -1,0 +1,22 @@
+.theme-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-height: 100vh;
+}
+
+toolsbar {
+  height: 40px;
+  line-height: 40px;
+}
+
+contentview {
+  flex: 1;
+  overflow: auto;
+}
+
+bottomstatusbar {
+  padding: 5px;
+  height: 20px;
+  line-height: 20px;
+}
