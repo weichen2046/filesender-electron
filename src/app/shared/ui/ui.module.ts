@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MaterialModule } from '@angular/material';
 
@@ -14,6 +15,7 @@ import { TabContentComponent } from './tabview/index';
 
 // toolsbar
 import { ToolsBarComponent } from './toolsbar/index';
+import { ToolsBarItemComponent } from './toolsbar/index';
 
 @NgModule({
   declarations: [
@@ -22,9 +24,11 @@ import { ToolsBarComponent } from './toolsbar/index';
     TabViewComponent,
     TabsBarComponent,
     TabContentComponent,
-    ToolsBarComponent
+    ToolsBarComponent,
+    ToolsBarItemComponent,
   ],
   imports: [
+    CommonModule,
     MaterialModule,
   ],
   providers: [],
@@ -33,6 +37,6 @@ import { ToolsBarComponent } from './toolsbar/index';
     ContentViewComponent,
     TabViewComponent,
     ToolsBarComponent
-  ]
+  ],
 })
 export class UiModule { }

@@ -1,7 +1,9 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { OnInit } from '@angular/core';
 
 import { EnvironConfigService } from './environ-config.service';
+
+import { ToolsBarComponent } from './shared/index';
 
 //impprt { remote } from 'electron';
 //const remote = require('electron').remote;
@@ -13,13 +15,19 @@ const { remote } = require('electron');
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
+
+  @ViewChild(ToolsBarComponent) toolsbar: ToolsBarComponent;
 
   constructor(private envConfig: EnvironConfigService) { }
 
   ngOnInit() {
   }
 
+  ngAfterViewInit() {
+  }
+
+  /*
   public newWindow() {
     let newW = new remote.BrowserWindow({
       width: 800,
@@ -30,4 +38,5 @@ export class AppComponent implements OnInit {
     newW.loadURL('file://' + remote.app.getAppPath() + '/dist/index.html');
     newW.show();
   }
+  */
 }

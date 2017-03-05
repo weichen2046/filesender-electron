@@ -1,0 +1,12 @@
+{
+  "version": "0.1.0",
+  "versioncode": 1,
+  "items": [
+    {
+      "type": "button",
+      "text": "Show PCs",
+      "cmd": "showPCs",
+      "icon": ""
+    }
+  ]
+}

@@ -1,3 +1,5 @@
-<div>
-  Content View
+<div *ngIf="isleftshow" class="content-left"></div>
+<div *ngIf="ismiddleshow" class="content-middle">
+  <template #middletemplate></template>
 </div>
+<div *ngIf="isrightshow" class="content-right"></div>
