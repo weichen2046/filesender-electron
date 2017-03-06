@@ -2,6 +2,7 @@ import { Component, ViewChild, AfterViewInit, OnChanges, ChangeDetectorRef } fro
 import { ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 
 import { ToolsBarItemComponent } from './toolsbar-item.component';
+import { ToolsBarManager } from './toolsbar-manager';
 
 const fs = require('fs');
 const { remote } = require('electron');
@@ -21,11 +22,14 @@ export class ToolsBarComponent implements AfterViewInit, OnChanges {
   private _itemAnchor: ViewContainerRef;
 
   private _configJson: any;
+  private _manager: ToolsBarManager;
 
   constructor(
     private _componentFactoryResolver: ComponentFactoryResolver,
     private _changeDetectorRef: ChangeDetectorRef
-  ) { }
+  ) {
+    this._manager = new ToolsBarManager();
+  }
 
   ngAfterViewInit() {
     let componentFactory = this._componentFactoryResolver.resolveComponentFactory(ToolsBarItemComponent);
@@ -48,15 +52,11 @@ export class ToolsBarComponent implements AfterViewInit, OnChanges {
       this._configJson.items.forEach((item) => {
         //console.log('config item:', item);
         let componentRef = this._itemAnchor.createComponent(componentFactory);
-        componentRef.instance.itemtype = item.type;
-        componentRef.instance.itemtext = item.text;
-        componentRef.instance.clickhandler = this[item.cmd];
+        componentRef.instance.configItem = item;
+        componentRef.instance.eventdispatcher = this._manager;
       });
       this._changeDetectorRef.detectChanges();
     });
   }
 
-  public showPCs() {
-    console.log('showPCs');
-  }
 }

@@ -1,5 +1,9 @@
-<div *ngIf="isleftshow" class="content-left"></div>
-<div *ngIf="ismiddleshow" class="content-middle">
-  <template #middletemplate></template>
+<div *ngIf="isleftshow" class="content-left">
+  <template #anchorLeft></template>
 </div>
-<div *ngIf="isrightshow" class="content-right"></div>
+<div *ngIf="ismiddleshow" class="content-middle">
+  <template #anchorMiddle></template>
+</div>
+<div *ngIf="isrightshow" class="content-right">
+  <template #anchorRight></template>
+</div>
