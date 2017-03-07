@@ -5,7 +5,7 @@
     {
       "type": "button",
       "text": "Show PCs",
-      "cmd": "tools-cmd-showPCs",
+      "cmd": "toolsbar-cmd-showPCs",
       "icon": ""
     }
   ]

@@ -40,6 +40,10 @@ export class ToolsBarComponent implements AfterViewInit, OnChanges {
   ngOnChanges(changes) {
   }
 
+  get manager(): ToolsBarManager {
+    return this._manager;
+  }
+
   public loadItems(config?: string) {
     //console.log('load toolsbar items from file:', config);
     fs.readFile(config, 'utf8', (err, data) => {

@@ -4,6 +4,8 @@ import { OnInit } from '@angular/core';
 import { EnvironConfigService } from './environ-config.service';
 
 import { ToolsBarComponent } from './shared/index';
+import { ContentViewComponent } from './shared/index';
+import { BottomStatusBarComponent } from './shared/index';
 
 //impprt { remote } from 'electron';
 //const remote = require('electron').remote;
@@ -17,7 +19,9 @@ const { remote } = require('electron');
 })
 export class AppComponent implements OnInit, AfterViewInit {
 
-  @ViewChild(ToolsBarComponent) toolsbar: ToolsBarComponent;
+  @ViewChild(ToolsBarComponent) _toolsbar: ToolsBarComponent;
+  @ViewChild(ContentViewComponent) _contentview: ContentViewComponent;
+  @ViewChild(BottomStatusBarComponent) _statusbar: BottomStatusBarComponent;
 
   constructor(private envConfig: EnvironConfigService) { }
 
@@ -25,6 +29,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    console.log('toolsbar.manager:', this._toolsbar.manager);
+    this._contentview.bindToolsBarManager(this._toolsbar.manager);
   }
 
   /*
