@@ -1,11 +1,11 @@
+import { ViewManager } from './view-manager';
+
 export class ContentViewManager {
 }
 
-export class LeftViewManager {
+export class LeftViewManager extends ViewManager {
 }
 
-export class MiddleViewManager {
+export class RightViewManager extends ViewManager {
 }
 
-export class RightViewManager {
-}

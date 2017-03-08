@@ -1,15 +1,20 @@
-import { Component, ViewChild, ViewContainerRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 
 import { ToolsBarManager } from '../toolsbar/toolsbar-manager';
-import { ToolsBarCmdHandler } from '../toolsbar/toolsbar-cmd-handler';
 import { ContentViewManager } from './contentview-manager';
+import { LeftViewManager, RightViewManager } from './contentview-manager';
+import { MiddleViewManager } from './middle-view-manager';
+
+import { TabViewComponent } from '../tabview/tabview.component';
 
 @Component({
   selector: 'contentview',
   templateUrl: './contentview.component.html',
-  styleUrls: [ './contentview.component.scss' ]
+  styleUrls: [ './contentview.component.scss' ],
+  entryComponents: [ TabViewComponent ]
 })
-export class ContentViewComponent implements ToolsBarCmdHandler, AfterViewInit {
+export class ContentViewComponent implements AfterViewInit {
   @ViewChild('anchorLeft', {read: ViewContainerRef}) _childAnchorLeft: ViewContainerRef;
   @ViewChild('anchorMiddle', {read: ViewContainerRef}) _childAnchorMidd: ViewContainerRef;
   @ViewChild('anchorRight', {read: ViewContainerRef}) _childAnchorRight: ViewContainerRef;
@@ -18,15 +23,26 @@ export class ContentViewComponent implements ToolsBarCmdHandler, AfterViewInit {
   private _showRight: boolean = false;
   private _showMiddle: boolean = true;
 
-  private _manager: ContentViewManager;
   private _viewInitialized: boolean = false;
+  private _manager: ContentViewManager;
+  private _leftManager: LeftViewManager;
+  private _middleManager: MiddleViewManager;
+  private _rightManager: RightViewManager;
 
-  constructor() {
+  constructor(
+    private _componentFactoryResolver: ComponentFactoryResolver
+  ) {
     this._manager = new ContentViewManager();
+    this._leftManager = new LeftViewManager();
+    this._middleManager = new MiddleViewManager();
+    this._rightManager = new RightViewManager();
   }
 
   ngAfterViewInit() {
     this._viewInitialized = true;
+    this._leftManager.attach(this._childAnchorLeft, this._componentFactoryResolver);
+    this._middleManager.attach(this._childAnchorMidd, this._componentFactoryResolver);
+    this._rightManager.attach(this._childAnchorRight, this._componentFactoryResolver);
   }
 
   public showLeft(show: boolean) {
@@ -46,11 +62,6 @@ export class ContentViewComponent implements ToolsBarCmdHandler, AfterViewInit {
   }
 
   public bindToolsBarManager(manager: ToolsBarManager) {
-    manager.registerHandler('toolsbar-cmd-showPCs', this);
+    manager.registerHandler('toolsbar-cmd-showPCs', this._middleManager);
   }
-
-  public handleCmd(cmd: string) {
-    console.log('content view handle cmd:', cmd);
-  }
-
 }

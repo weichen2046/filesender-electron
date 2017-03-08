@@ -32,7 +32,6 @@ export class ToolsBarComponent implements AfterViewInit, OnChanges {
   }
 
   ngAfterViewInit() {
-    let componentFactory = this._componentFactoryResolver.resolveComponentFactory(ToolsBarItemComponent);
     let configFile = remote.app.getAppPath() + '/dist/config/toolsbar.config.json';
     this.loadItems(configFile);
   }
