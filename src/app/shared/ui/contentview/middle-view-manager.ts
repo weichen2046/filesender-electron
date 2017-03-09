@@ -23,6 +23,7 @@ export class MiddleViewManager extends ViewManager {
     if (!this._tabView) {
       let componentFactory = this._compFactoryResolver.resolveComponentFactory(TabViewComponent);
       let tabviewRef = this._viewAnchor.createComponent(componentFactory);
+      tabviewRef.changeDetectorRef.detectChanges();
       this._tabView = tabviewRef.instance;
     }
     let tabId = this._tabView.manager.findTab('pc-list');

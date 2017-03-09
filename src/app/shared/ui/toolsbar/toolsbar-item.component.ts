@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit } from '@angular/core';
 
 import { ToolsBarConfigItem } from './toolsbar-config-item';
 import { ToolsBarEventDispatcher } from './toolsbar-event-dispatcher';
@@ -8,11 +8,19 @@ import { ToolsBarEventDispatcher } from './toolsbar-event-dispatcher';
   templateUrl: './toolsbar-item.component.html',
   styleUrls: [ './toolsbar-item.component.scss' ]
 })
-export class ToolsBarItemComponent {
+export class ToolsBarItemComponent implements OnInit, AfterViewInit {
   private _config: ToolsBarConfigItem;
   private _type: string = 'button';
   private _text: string = ''
   private _eventDispatcher: ToolsBarEventDispatcher;
+
+  ngOnInit() {
+    //console.log('ToolsBarItemComponent ngOnInit');
+  }
+
+  ngAfterViewInit() {
+    //console.log('ToolsBarItemComponent ngAfterViewInit');
+  }
 
   set configItem(config: ToolsBarConfigItem) {
     this._config = config;

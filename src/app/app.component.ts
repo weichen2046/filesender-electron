@@ -29,7 +29,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    console.log('toolsbar.manager:', this._toolsbar.manager);
+    //console.log('toolsbar.manager:', this._toolsbar.manager);
     this._contentview.bindToolsBarManager(this._toolsbar.manager);
   }
 
