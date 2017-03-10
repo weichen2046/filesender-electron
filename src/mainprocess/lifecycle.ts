@@ -1,14 +1,17 @@
 import { NetworkServerCallback } from './networkservercallback';
 import { DesktopCmds } from './network/desktop/desktopcmds';
+import { MessageCenter } from './message-center';
 
 export class LifeCycleHooks implements NetworkServerCallback {
   private startedServerCount: number = 0;
+  private messageCenter = new MessageCenter();
 
   public constructor(private readonly serverCount: number) {
   }
 
   public onAppStart() {
     console.log('lifecycle onAppStart');
+    this.messageCenter.init();
   }
 
   public onNetworkServersStarted() {
@@ -24,6 +27,7 @@ export class LifeCycleHooks implements NetworkServerCallback {
   // onAppQuit() may comes after onNetworkServersStopped()
   public onAppQuit() {
     console.log('lifecycle onAppQuit');
+    this.messageCenter.destroy();
   }
 
   // overrides
