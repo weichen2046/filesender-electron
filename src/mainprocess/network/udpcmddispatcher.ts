@@ -13,7 +13,7 @@ export class UdpCmdDispatcher {
     let res = true;
     switch(cmd) {
       case config.cmd.phone.cmd_phone_online:
-	res = new CmdPhoneOnline(this.sock).handle(data);
+      res = new CmdPhoneOnline(this.sock).handle(data);
     }
     return res;
   }

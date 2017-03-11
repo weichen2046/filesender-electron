@@ -15,7 +15,7 @@ import { TabContentComponent } from './tabview/index';
 import { TabBarItemComponent } from './tabview/index';
 
 // tabview pages
-import { PCListComponent } from './pc-list/index';
+import { PhoneListComponent } from './phone-list/index';
 
 // toolsbar
 import { ToolsBarComponent } from './toolsbar/index';
@@ -31,7 +31,7 @@ import { ToolsBarItemComponent } from './toolsbar/index';
     TabContentComponent,
     ToolsBarComponent,
     ToolsBarItemComponent,
-    PCListComponent,
+    PhoneListComponent,
   ],
   imports: [
     CommonModule,
@@ -45,7 +45,7 @@ import { ToolsBarItemComponent } from './toolsbar/index';
     ToolsBarComponent
   ],
   entryComponents: [
-    PCListComponent,
+    PhoneListComponent,
   ],
 })
 export class UiModule { }

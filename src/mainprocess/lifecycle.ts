@@ -1,6 +1,6 @@
 import { NetworkServerCallback } from './networkservercallback';
 import { DesktopCmds } from './network/desktop/desktopcmds';
-import { MessageCenter } from './message-center';
+import { MessageCenter } from './message/message-center';
 
 export class LifeCycleHooks implements NetworkServerCallback {
   private startedServerCount: number = 0;

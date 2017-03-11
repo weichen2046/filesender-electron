@@ -62,6 +62,9 @@ export class ContentViewComponent implements AfterViewInit {
   }
 
   public bindToolsBarManager(manager: ToolsBarManager) {
-    manager.registerHandler('toolsbar-cmd-showPCs', this._middleManager);
+    let handlers = this._middleManager.getToolsBarCmdHandlers();
+    handlers.forEach(item => {
+      manager.registerHandler(item.cmd, item.handler);
+    });
   }
 }

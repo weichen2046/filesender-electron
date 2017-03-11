@@ -4,8 +4,8 @@
   "items": [
     {
       "type": "button",
-      "text": "Show PCs",
-      "cmd": "toolsbar-cmd-showPCs",
+      "text": "Show Phones",
+      "cmd": "toolsbar-cmd-showPhones",
       "icon": ""
     }
   ]

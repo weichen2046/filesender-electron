@@ -1,1 +1,0 @@
-export * from './pc-list.component';

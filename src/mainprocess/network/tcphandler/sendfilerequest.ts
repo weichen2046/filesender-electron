@@ -185,9 +185,9 @@ export class CmdSendFileRequest extends TcpCmdHandler {
       msg.fill(new Int64(this.fileId).toBuffer(), buffOffset);
       //console.log(`send file receive confirm, port: ${config.phoneUdpPort}, broadcast address: ${broadcastAddr}`);
       client.send(msg, config.phoneUdpPort, broadcastAddr, (err) => {
-	//console.log('udp send finished close sock');
-	client.close();
-	client = null;
+        //console.log('udp send finished close sock');
+        client.close();
+        client = null;
       });
     });
   }
