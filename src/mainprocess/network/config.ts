@@ -4,7 +4,8 @@ export const config = {
     pc: {
       'cmd_pc_online'           : 1,
       'cmd_pc_offline'          : 2,
-      'cmd_confirm_recv_file'   : 3
+      'cmd_confirm_recv_file'   : 3,
+      'cmd_request_auth'        : 4,
     },
     // phone -> pc
     phone: {

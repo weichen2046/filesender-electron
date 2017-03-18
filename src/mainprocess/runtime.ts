@@ -14,4 +14,11 @@ export class Runtime {
   get phones(): Phone[] {
     return this._phones;
   }
+
+  public findPhone(phone: Phone): Phone|undefined {
+    let res = this._phones.find(p => {
+      return p.address === phone.address && p.udpPort === phone.udpPort;
+    });
+    return res;
+  }
 }
