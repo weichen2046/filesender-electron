@@ -9,10 +9,11 @@ export const config = {
     },
     // phone -> pc
     phone: {
-      'cmd_phone_online'        : 1,
-      'cmd_phone_offline'       : 2,
-      'cmd_send_file'           : 3,
-      'cmd_send_file_request'   : 4
+      'cmd_phone_online'          : 1,
+      'cmd_phone_offline'         : 2,
+      'cmd_send_file'             : 3,
+      'cmd_send_file_request'     : 4,
+      'cmd_confirm_auth_request'  : 5,
     }
   },
   tcp: {

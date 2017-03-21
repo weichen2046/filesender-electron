@@ -9,11 +9,11 @@ const uuid = require('uuid');
 
 // Handle mobile device online command from mobile device.
 export class CmdPhoneOnline {
-  private sock = null;
+  private _sock = null;
   private _remoteInfo: RemoteInfo;
 
   constructor(sock, rinfo: RemoteInfo) {
-    this.sock = sock;
+    this._sock = sock;
     this._remoteInfo = rinfo;
   }
 
@@ -33,7 +33,7 @@ export class CmdPhoneOnline {
 
     // check the phone exist or not according to the address and udp port
     let runtime = Runtime.instance;
-    let p = runtime.findPhone(phone);
+    let p = runtime.findPhoneByPhone(phone);
     if (p) {
       // reset access token and auth token
       p.accessToken = null;
@@ -88,7 +88,7 @@ export class CmdPhoneOnline {
     buffOffset += phone.authToken.length;
     msg.writeInt32BE(config.udp.port, buffOffset);
     console.log(`send auth request phone, addr: ${phone.address}, phone port: ${phone.udpPort}`);
-    this.sock.send(msg, phone.udpPort, phone.address);
+    this._sock.send(msg, phone.udpPort, phone.address);
   }
 
   private reportPcOnline(phonePort: number) {
@@ -110,6 +110,6 @@ export class CmdPhoneOnline {
     buffOffset += 4;
     msg.writeInt32BE(config.tcp.port, buffOffset);
     console.log(`send pc online to broadcast addr: ${broadcastAddr}, phone port: ${phonePort}`);
-    this.sock.send(msg, phonePort, broadcastAddr);
+    this._sock.send(msg, phonePort, broadcastAddr);
   }
 }
