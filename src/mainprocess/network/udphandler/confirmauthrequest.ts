@@ -1,3 +1,5 @@
+import { config } from '../config';
+import { Phone } from '../../message/phone';
 import { RemoteInfo } from '../udpdefs';
 import { Runtime } from '../../runtime';
 
@@ -42,11 +44,41 @@ export class CmdConfirmAuthRequest {
       let accessToken = data.toString('utf8', offset, offset + tokenLen);
       //console.log('accessToken:', accessToken);
       p.accessToken = accessToken;
+
+      // exchange tcp listen port
+      this.exhangeTcpListenPort(p);
     } else {
         // delete from runtime
         runtime.deletePhone(p);
     }
     //console.log('runtime.phones:', runtime.phones);
     return true;
+  }
+
+  private exhangeTcpListenPort(phone: Phone) {
+    // 4 bytes -> data version
+    // 4 bytes -> cmd
+    // 4 bytes -> access token length
+    // x bytes -> access token
+    // 4 bytes -> tcp listen port
+    let dataLen = 4 + 4 + 4 + phone.accessToken.length + 4;
+    let msg = Buffer.alloc(dataLen);
+    // write data version
+    let buffOffset = 0;
+    msg.writeInt32BE(config.tcp.dataVer, buffOffset);
+    // write cmd
+    buffOffset += 4;
+    msg.writeInt32BE(config.cmd.pc.cmd_exchange_tcp_port, buffOffset);
+    // write access token length
+    buffOffset += 4;
+    msg.writeInt32BE(phone.accessToken.length, buffOffset);
+    // write access token
+    buffOffset += 4;
+    msg.write(phone.accessToken, buffOffset, phone.accessToken.length);
+    // write tcp port
+    buffOffset += phone.accessToken.length;
+    msg.writeInt32BE(config.tcp.port, buffOffset);
+    //console.log(`exchange tcp port phone: ${phone.address}, phone port: ${phone.udpPort}`);
+    this._sock.send(msg, phone.udpPort, phone.address);
   }
 }
