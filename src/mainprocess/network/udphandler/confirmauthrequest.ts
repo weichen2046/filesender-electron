@@ -1,55 +1,38 @@
+import { AuthPhoneHandler } from './authphonehandler';
 import { config } from '../config';
 import { Phone } from '../../message/phone';
 import { RemoteInfo } from '../udpdefs';
 import { Runtime } from '../../runtime';
 
-export class CmdConfirmAuthRequest {
-  private _sock = null;
-  private _remoteInfo: RemoteInfo;
-
+export class CmdConfirmAuthRequest extends AuthPhoneHandler {
   constructor(sock, rinfo: RemoteInfo) {
-    this._sock = sock;
-    this._remoteInfo = rinfo;
+    super(sock, rinfo);
   }
 
   public handle(data: Buffer): boolean {
-    // 4 bytes -> access token length
-    let offset = 0;
-    let tokenLen = data.readInt32BE(offset);
-    // x bytes -> access token
-    offset += 4;
-    let authToken = data.toString('utf8', offset, offset + tokenLen);
-
-    // TODO: authenticate with access token
-    let runtime = Runtime.instance;
-    let p = runtime.authenticatePhoneToken(this._remoteInfo.address, authToken);
-    //console.log('auth phone:', p);
-
-    if (!p) {
-      console.log('phone authenticate failed.');
-      return;
+    let res = super.handle(data);
+    if (!res) {
+      return false;
     }
 
-    // if auth pass then
     // 1 bytes -> confirm state
-    offset += tokenLen;
-    let accept: boolean = data.readInt8(offset) == 1;
+    let accept: boolean = data.readInt8(this._startOffset) == 1;
     //console.log('authToken:', authToken, 'accept:', accept);
     if (accept) {
       // 4 bytes -> phone access token length
-      offset += 1;
-      tokenLen = data.readInt32BE(offset);
+      this._startOffset += 1;
+      let tokenLen = data.readInt32BE(this._startOffset);
       // x bytes -> phone access token
-      offset += 4;
-      let accessToken = data.toString('utf8', offset, offset + tokenLen);
+      this._startOffset += 4;
+      let accessToken = data.toString('utf8', this._startOffset, this._startOffset + tokenLen);
       //console.log('accessToken:', accessToken);
-      p.accessToken = accessToken;
+      this._phone.accessToken = accessToken;
 
       // exchange tcp listen port
-      this.exhangeTcpListenPort(p);
+      this.exhangeTcpListenPort(this._phone);
     } else {
         // delete from runtime
-        runtime.deletePhone(p);
+        this._runtime.deletePhone(this._phone);
     }
     //console.log('runtime.phones:', runtime.phones);
     return true;

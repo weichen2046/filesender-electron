@@ -2,6 +2,7 @@ import { config } from './config';
 
 import { CmdPhoneOnline } from './udphandler/phoneonline';
 import { CmdConfirmAuthRequest } from './udphandler/confirmauthrequest';
+import { CmdConfirmExchangeTcpPort } from './udphandler/confirmexchangetcpport';
 
 import { RemoteInfo } from './udpdefs';
 
@@ -21,6 +22,9 @@ export class UdpCmdDispatcher {
         break;
       case config.cmd.phone.cmd_confirm_auth_request:
         res = new CmdConfirmAuthRequest(this._sock, rinfo).handle(data);
+        break;
+      case config.cmd.phone.cmd_confirm_exchange_tcp_port:
+        res = new CmdConfirmExchangeTcpPort(this._sock, rinfo).handle(data);
         break;
     }
     return res;
