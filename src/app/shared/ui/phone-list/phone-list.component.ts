@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
+
 import { ipcRenderer } from 'electron';
 
 import { Message } from '../../message/index';
@@ -10,9 +12,15 @@ import { Phone } from '../../message/index';
   styleUrls: [ './phone-list.component.scss' ]
 })
 export class PhoneListComponent {
-  constructor() {
+  private _phones: Phone[] = [];
+
+  constructor(private _changeDetector: ChangeDetectorRef) {
     this.init();
     this.retrievePhoneList();
+  }
+
+  get phones(): Phone[] {
+    return this._phones;
   }
 
   private init() {
@@ -29,9 +37,14 @@ export class PhoneListComponent {
     ipcRenderer.send('asynchronous-message', msg)
   }
 
-  private onPhoneListRetrieved(phones: Phone[]) {
+  private onPhoneListRetrieved(_phones: Phone[]) {
+    /*
+    // TODO: we can filter or transform the phone item here
     phones.forEach(item => {
-      // TODO:
+      console.log('received phone:', item);
     });
+    */
+    this._phones = _phones;
+    this._changeDetector.detectChanges();
   }
 }

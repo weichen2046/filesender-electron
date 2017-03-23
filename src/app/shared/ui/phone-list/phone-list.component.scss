@@ -1,0 +1,16 @@
+.phone-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.phone-card {
+  width: 400px;
+  margin-bottom: 20px;
+}
+
+.phone-header-image {
+  background-image: url('assets/img/icon.png');
+  background-size: cover;
+}
