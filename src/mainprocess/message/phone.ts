@@ -1,6 +1,7 @@
 export class Phone {
   online: boolean = false;
   address: string;
+  nickname: string;
   family: string;
   udpPort: number = 4556; // default phone udp port
   tcpPort: number = 6852; // default phone tcp port

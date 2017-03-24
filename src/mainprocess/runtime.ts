@@ -1,14 +1,25 @@
 import { Phone } from './message/phone';
 
+const uuid = require('uuid');
+
 export class Runtime {
   private static _instance: Runtime;
   private _phones: Phone[] = [];
+
+  private _tempAccessToken: string;
 
   static get instance(): Runtime {
     if (!Runtime._instance) {
       Runtime._instance = new Runtime();
     }
     return Runtime._instance;
+  }
+
+  get tempAccessToken(): string {
+    if (!this._tempAccessToken) {
+      this._tempAccessToken = uuid.v1().replace(/-/g, '');
+    }
+    return this._tempAccessToken;
   }
 
   get phones(): Phone[] {
