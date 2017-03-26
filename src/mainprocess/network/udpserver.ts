@@ -1,11 +1,10 @@
 const dgram = require('dgram');
 
-const { config } = require('./config');
-const { NetUtils } = require('../utils/network/netutils');
-import { UdpCmdDispatcher } from './udpcmddispatcher';
-
+import { config } from './config';
+import { NetUtils } from '../utils/network/netutils';
 import { NetworkServerCallback } from '../networkservercallback';
-import { RemoteInfo } from './udpdefs';
+import { UdpCmdDispatcher } from './udpcmddispatcher';
+import { UdpRemoteInfo } from './remoteinfo';
 
 export class UdpServer {
   private sock = null;
@@ -44,7 +43,7 @@ export class UdpServer {
     this.sock.close();
   }
 
-  private onServerMessage(msg, rinfo: RemoteInfo) {
+  private onServerMessage(msg, rinfo: UdpRemoteInfo) {
     // 4 bytes cmd version
     // 4 bytes cmd
     // rest bytes message of cmd

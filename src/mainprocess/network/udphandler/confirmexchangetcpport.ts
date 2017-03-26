@@ -1,9 +1,9 @@
 import { AuthPhoneHandler } from './authphonehandler';
-import { RemoteInfo } from '../udpdefs';
+import { UdpRemoteInfo } from '../remoteinfo';
 import { Runtime } from '../../runtime';
 
 export class CmdConfirmExchangeTcpPort extends AuthPhoneHandler {
-  constructor(sock, rinfo: RemoteInfo) {
+  constructor(sock, rinfo: UdpRemoteInfo) {
     super(sock, rinfo);
   }
 

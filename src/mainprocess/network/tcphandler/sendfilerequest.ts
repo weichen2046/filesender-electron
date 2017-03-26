@@ -1,26 +1,31 @@
 const { app } = require('electron');
-const { config } = require('../config');
 const dgram = require('dgram');
 const fs = require('fs');
 const Int64 = require('node-int64');
 const notifier = require('node-notifier');
-const { NetUtils } = require('../../utils/network/netutils');
-const { StorageManager } = require('../../storage/storagemanager');
 
+import { config } from '../config';
+import { NetUtils } from '../../utils/network/netutils';
+import { Phone } from '../../message/phone';
+import { Runtime } from '../../runtime';
+import { StorageManager } from '../../storage/storagemanager';
 import { TcpCmdHandler } from '../tcpcmdhandler';
+import { TcpRemoteInfo } from '../remoteinfo';
 
 // Handle send file request command from mobile device.
 export class CmdSendFileRequest extends TcpCmdHandler {
   private fileName = null;
   private fileNameLen = 0;
+  private tokenLen = 0;
+  private authToken = null;
   private fileId = -1;
   private hasThumbnail = false;
   private thumbnailLen = 0;
   private recvThumbnailLen = 0;
   private recvThumbnailFd = null;
 
-  constructor(dataVer) {
-    super();
+  constructor(dataVer, rinfo: TcpRemoteInfo) {
+    super(rinfo);
     this.dataVer = dataVer;
     this.initStates();
   }
@@ -40,6 +45,14 @@ export class CmdSendFileRequest extends TcpCmdHandler {
 
   protected initStates() {
     super.initStates();
+    this.states.push({
+      handle: this.tokenLengthParser.bind(this),
+      expectLen: () => { return 4; }
+    });
+    this.states.push({
+      handle: this.authTokenParser.bind(this),
+      expectLen: () => { return this.tokenLen; }
+    });
     this.states.push({
       handle: this.fileNameLengthParser.bind(this),
       expectLen: () => { return 4; }
@@ -71,31 +84,44 @@ export class CmdSendFileRequest extends TcpCmdHandler {
     //console.log('CmdSendFileRequest allDataRecved called');
     if (process.platform == 'darwin') {
       new notifier.NotificationCenter().notify({
-	title: 'File receive confirm?',
-	message: this.fileName,
-	sound: 'Funk',
-	closeLabel: 'Cancel',
-	actions: 'Ok',
-	icon: 'file://' + app.getAppPath() + '/dist/assets/png/256.png',
-	wait: true,
-	timeout: 10
+        title: 'File receive confirm?',
+        message: this.fileName,
+        sound: 'Funk',
+        closeLabel: 'Cancel',
+        actions: 'Ok',
+        icon: 'file://' + app.getAppPath() + '/dist/assets/png/256.png',
+        wait: true,
+        timeout: 10
       }, (err, resp, metadata) => {
-	if (metadata.activationValue === 'Ok') {
-	  this.sendRecvConfirm();
-	  return;
-	}
-	this.sendRecvConfirm(false);
+        if (metadata.activationValue === 'Ok') {
+          this.sendRecvConfirm();
+          return;
+        }
+        this.sendRecvConfirm(false);
       });
     } else {
       console.log('other os nofication');
       notifier.notify({
-	title: 'File receive confirm',
-	message: this.fileName
+        title: 'File receive confirm',
+        message: this.fileName
       });
     }
   }
 
   // private methods
+
+  private tokenLengthParser(data, state): boolean {
+    this.tokenLen = data.readInt32BE(0);
+    console.log(`read auth token length: ${this.tokenLen}`);
+    return true;
+  }
+
+  private authTokenParser(data, state): boolean {
+    this.authToken = data.toString('utf8', 0, this.tokenLen);
+    console.log(`read auth token: ${this.authToken}`);
+    // TODO: authenticate with auth token
+    return true;
+  }
 
   private fileNameLengthParser(data, state): boolean {
     this.fileNameLen = data.readInt32BE(0);
@@ -153,21 +179,14 @@ export class CmdSendFileRequest extends TcpCmdHandler {
   private sendRecvConfirm(yes: boolean = true) {
     console.log('send confirm to phone:', yes);
 
-    // TODO: get phone UDP listen port by ip address
-    if (!config.phoneUdpPort) {
-      console.log('has no phone UDP listen port');
-      return;
-    }
-
-    let broadcastAddr = NetUtils.getIpV4BroadcastAddress();
-    if (broadcastAddr === null) {
-      console.log('Can not report PC info for broadcast address is null');
+    let phone = Runtime.instance.authenticatePhoneToken(this._remoteInfo.address, this.authToken);
+    if (!phone) {
+      console.log('phone authenticate failed when handle request send file cmd');
       return;
     }
 
     let client = dgram.createSocket('udp4');
     client.bind(() => {
-      client.setBroadcast(true);
       // 4 bytes data version
       // 4 bytes cmd
       // 1 bytes yes/no
@@ -183,9 +202,9 @@ export class CmdSendFileRequest extends TcpCmdHandler {
       buffOffset += 1;
       // write confirmed file identity
       msg.fill(new Int64(this.fileId).toBuffer(), buffOffset);
-      //console.log(`send file receive confirm, port: ${config.phoneUdpPort}, broadcast address: ${broadcastAddr}`);
-      client.send(msg, config.phoneUdpPort, broadcastAddr, (err) => {
-        //console.log('udp send finished close sock');
+      //console.log(`send file receive confirm, port: ${phone.udpPort}, broadcast address: ${phone.address}`);
+      client.send(msg, phone.udpPort, phone.address, (err) => {
+        //console.log('udp send confirm file request finished, close sock');
         client.close();
         client = null;
       });

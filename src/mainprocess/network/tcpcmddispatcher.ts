@@ -1,12 +1,13 @@
-const { config } = require('./config');
-const { CmdSendFile } = require('./tcphandler/sendfile');
-const { CmdSendFileRequest } = require('./tcphandler/sendfilerequest');
+import { config } from './config';
+import { CmdSendFile } from './tcphandler/sendfile';
+import { CmdSendFileRequest } from './tcphandler/sendfilerequest';
 
+import { TcpRemoteInfo } from './remoteinfo';
 import { TcpCmdHandler } from './tcpcmdhandler';
 
 export class TcpCmdDispatcher extends TcpCmdHandler {
-  constructor() {
-    super();
+  constructor(rinfo: TcpRemoteInfo) {
+    super(rinfo);
     this.initStates();
   }
 
@@ -44,10 +45,10 @@ export class TcpCmdDispatcher extends TcpCmdHandler {
     console.log(`dispach cmd: ${cmd}`);
     switch(cmd) {
       case config.cmd.phone.cmd_send_file:
-        this.innerHandler = new CmdSendFile(this.dataVer);
+        this.innerHandler = new CmdSendFile(this.dataVer, this._remoteInfo);
         break;
       case config.cmd.phone.cmd_send_file_request:
-        this.innerHandler = new CmdSendFileRequest(this.dataVer);
+        this.innerHandler = new CmdSendFileRequest(this.dataVer, this._remoteInfo);
         break;
       default:
         console.log(`unknown cmd to dispatch cmd: ${cmd}`);

@@ -1,11 +1,11 @@
 import { AuthPhoneHandler } from './authphonehandler';
 import { config } from '../config';
 import { Phone } from '../../message/phone';
-import { RemoteInfo } from '../udpdefs';
+import { UdpRemoteInfo } from '../remoteinfo';
 import { Runtime } from '../../runtime';
 
 export class CmdConfirmAuthRequest extends AuthPhoneHandler {
-  constructor(sock, rinfo: RemoteInfo) {
+  constructor(sock, rinfo: UdpRemoteInfo) {
     super(sock, rinfo);
   }
 

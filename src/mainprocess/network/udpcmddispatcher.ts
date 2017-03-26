@@ -1,10 +1,9 @@
 import { config } from './config';
+import { UdpRemoteInfo } from './remoteinfo';
 
 import { CmdPhoneOnline } from './udphandler/phoneonline';
 import { CmdConfirmAuthRequest } from './udphandler/confirmauthrequest';
 import { CmdConfirmExchangeTcpPort } from './udphandler/confirmexchangetcpport';
-
-import { RemoteInfo } from './udpdefs';
 
 export class UdpCmdDispatcher {
   private _sock = null;
@@ -13,7 +12,7 @@ export class UdpCmdDispatcher {
     this._sock = sock;
   }
 
-  public handleCmd(dataVer: number, cmd: number, data, rinfo: RemoteInfo): boolean {
+  public handleCmd(dataVer: number, cmd: number, data, rinfo: UdpRemoteInfo): boolean {
     console.log(`handle cmd, data version: ${dataVer}, cmd: ${cmd}`);
     let res = true;
     switch(cmd) {

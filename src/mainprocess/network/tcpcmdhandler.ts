@@ -1,6 +1,9 @@
+import { TcpRemoteInfo } from './remoteinfo';
+
 const { BufferUtil } = require('../utils/buffer');
 
 export abstract class TcpCmdHandler {
+  protected _remoteInfo: TcpRemoteInfo = null;
   protected dataVer = -1;
   protected cmd = -1;
   protected innerHandler = null;
@@ -8,18 +11,22 @@ export abstract class TcpCmdHandler {
   protected stateIndex = 0;
   protected states = [];
 
+  constructor(rinfo: TcpRemoteInfo) {
+    this._remoteInfo = rinfo;
+  }
+
   public handle(data: Buffer) {
     if (this.innerHandler == null) {
       //console.log(`current stateIndex: ${this.stateIndex}`);
       if (this.stateIndex < this.states.length) {
         let state = this.states[this.stateIndex];
         let res = this.parseData(data, state);
-	if (res) {
-	  this.stateIndex += 1;
-	  this.handle(null);
-	}
+        if (res) {
+          this.stateIndex += 1;
+          this.handle(null);
+        }
       } else if (this.stateIndex == this.states.length) {
-	this.allDataRecved();
+        this.allDataRecved();
       } else {
         console.log(`index out of states array, curr index: ${this.stateIndex}, states array length: ${this.states.length}`);
       }

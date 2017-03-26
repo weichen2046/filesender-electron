@@ -1,25 +1,21 @@
 const fs = require('fs');
 const Int64 = require('node-int64');
 
-const { BufferUtil } = require('../../utils/buffer');
-const { StorageManager } = require('../../storage/storagemanager');
+import { BufferUtil } from '../../utils/buffer';
+import { StorageManager } from '../../storage/storagemanager';
+import { TcpCmdHandler } from '../tcpcmdhandler';
+import { TcpRemoteInfo } from '../remoteinfo';
 
 // Handle send file command from mobile device.
-export class CmdSendFile {
-  private innerHandler = null;
-  private remainderData = null;
-  private stateIndex = 0;
-  private states = [];
-
-  private dataVer = -1;
-
+export class CmdSendFile extends TcpCmdHandler {
   private fileName = null;
   private fileNameLen = 0;
   private fileContentLen = 0;
   private recvFileLen = 0;
   private recvFd = null;
 
-  constructor(dataVer) {
+  constructor(dataVer, rinfo: TcpRemoteInfo) {
+    super(rinfo);
     this.dataVer = dataVer;
     this.initStates();
   }
@@ -50,9 +46,7 @@ export class CmdSendFile {
     }
   }
 
-  // private methods
-
-  private initStates() {
+  protected initStates() {
     this.stateIndex = 0;
     this.states.push({
       handle: this.fileNameLengthParser.bind(this)
@@ -67,6 +61,8 @@ export class CmdSendFile {
       handle: this.fileContentParser.bind(this)
     });
   }
+
+  // private methods
 
   private fileNameLengthParser(data) {
     let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
