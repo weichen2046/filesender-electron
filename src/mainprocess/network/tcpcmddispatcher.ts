@@ -40,7 +40,7 @@ export class TcpCmdDispatcher extends TcpCmdHandler {
     return true;
   }
 
-  private dispatchCmd(data, state): boolean {
+  private dispatchCmd(data: Buffer, state): boolean {
     let cmd = this.cmd;
     console.log(`dispach cmd: ${cmd}`);
     switch(cmd) {
@@ -52,12 +52,13 @@ export class TcpCmdDispatcher extends TcpCmdHandler {
         break;
       default:
         console.log(`unknown cmd to dispatch cmd: ${cmd}`);
+        return false;
     }
 
     if (this.innerHandler) {
-      this.innerHandler.handle(data);
+      this.innerHandler.setReminderData(data);
     }
 
-    return false;
+    return true;
   }
 }

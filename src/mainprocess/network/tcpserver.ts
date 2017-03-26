@@ -1,8 +1,8 @@
 const net = require('net');
 
-const { config } = require('./config');
-const { NetUtils } = require('../utils/network/netutils');
-
+import { config } from './config';
+import { NetUtils } from '../utils/network/netutils';
+import { Result } from './tcpcmdhandler';
 import { TcpCmdDispatcher } from './tcpcmddispatcher';
 import { NetworkServerCallback } from '../networkservercallback';
 
@@ -59,7 +59,18 @@ export class TcpServer {
     let tcpDispatcher = new TcpCmdDispatcher({address: sock.remoteAddress, family: sock.remoteFamily, port: sock.remotePort});
     sock.on('data', (data) => {
       //console.log('received client data, length:', data.length);
-      tcpDispatcher.handle(data);
+      let res = tcpDispatcher.handle(data);
+      if (res == Result.Abort) {
+        sock.end();
+        return;
+      }
+      while(res != Result.MoreData && res != Result.Finish) {
+        res = tcpDispatcher.handle(null);
+        if (res == Result.Abort) {
+          sock.end();
+          break;
+        }
+      }
     });
 
     sock.on('end', () => {

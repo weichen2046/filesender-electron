@@ -23,6 +23,7 @@ export class CmdSendFileRequest extends TcpCmdHandler {
   private thumbnailLen = 0;
   private recvThumbnailLen = 0;
   private recvThumbnailFd = null;
+  private _phone: Phone;
 
   constructor(dataVer, rinfo: TcpRemoteInfo) {
     super(rinfo);
@@ -119,8 +120,9 @@ export class CmdSendFileRequest extends TcpCmdHandler {
   private authTokenParser(data, state): boolean {
     this.authToken = data.toString('utf8', 0, this.tokenLen);
     console.log(`read auth token: ${this.authToken}`);
-    // TODO: authenticate with auth token
-    return true;
+    // authenticate with auth token
+    this._phone = Runtime.instance.authenticatePhoneToken(this._remoteInfo.address, this.authToken);
+    return !(!this._phone);
   }
 
   private fileNameLengthParser(data, state): boolean {
@@ -179,7 +181,7 @@ export class CmdSendFileRequest extends TcpCmdHandler {
   private sendRecvConfirm(yes: boolean = true) {
     console.log('send confirm to phone:', yes);
 
-    let phone = Runtime.instance.authenticatePhoneToken(this._remoteInfo.address, this.authToken);
+    let phone = this._phone;
     if (!phone) {
       console.log('phone authenticate failed when handle request send file cmd');
       return;

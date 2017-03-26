@@ -3,7 +3,7 @@ const Int64 = require('node-int64');
 
 import { BufferUtil } from '../../utils/buffer';
 import { StorageManager } from '../../storage/storagemanager';
-import { TcpCmdHandler } from '../tcpcmdhandler';
+import { Result, TcpCmdHandler } from '../tcpcmdhandler';
 import { TcpRemoteInfo } from '../remoteinfo';
 
 // Handle send file command from mobile device.
@@ -20,7 +20,7 @@ export class CmdSendFile extends TcpCmdHandler {
     this.initStates();
   }
 
-  public handle(data) {
+  public handle(data): Result {
     if (this.innerHandler == null) {
       //console.log(`current stateIndex: ${this.stateIndex}`);
       if (this.stateIndex < this.states.length) {
@@ -29,8 +29,9 @@ export class CmdSendFile extends TcpCmdHandler {
       } else {
         console.log(`index out of states array, curr index: ${this.stateIndex}, states array length: ${this.states.length}`);
       }
+      return Result.MoreData;
     } else {
-      this.innerHandler.handle(data);
+      return this.innerHandler.handle(data);
     }
   }
 

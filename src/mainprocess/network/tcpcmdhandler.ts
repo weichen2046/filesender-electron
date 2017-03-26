@@ -1,13 +1,19 @@
+import { BufferUtil } from '../utils/buffer';
 import { TcpRemoteInfo } from './remoteinfo';
 
-const { BufferUtil } = require('../utils/buffer');
+export enum Result {
+  Ok = 1,
+  Finish,
+  MoreData,
+  Abort,
+}
 
 export abstract class TcpCmdHandler {
   protected _remoteInfo: TcpRemoteInfo = null;
   protected dataVer = -1;
   protected cmd = -1;
-  protected innerHandler = null;
-  protected remainderData = null;
+  protected innerHandler: TcpCmdHandler = null;
+  protected remainderData: Buffer = null;
   protected stateIndex = 0;
   protected states = [];
 
@@ -15,23 +21,29 @@ export abstract class TcpCmdHandler {
     this._remoteInfo = rinfo;
   }
 
-  public handle(data: Buffer) {
+  public handle(newData: Buffer): Result {
     if (this.innerHandler == null) {
       //console.log(`current stateIndex: ${this.stateIndex}`);
       if (this.stateIndex < this.states.length) {
         let state = this.states[this.stateIndex];
-        let res = this.parseData(data, state);
-        if (res) {
+        let res = this.parseData(newData, state);
+        if (res == Result.Ok) {
           this.stateIndex += 1;
-          this.handle(null);
+        } else if (res == Result.Abort) {
+          // TODO: some thing wrong with state[x], ignore or abort
+          // we can return Ok or Abort according to state config here
+          return Result.Abort;
         }
+        return res;
       } else if (this.stateIndex == this.states.length) {
         this.allDataRecved();
+        return Result.Finish;
       } else {
         console.log(`index out of states array, curr index: ${this.stateIndex}, states array length: ${this.states.length}`);
+        return Result.Abort;
       }
     } else {
-      this.innerHandler.handle(data);
+      return this.innerHandler.handle(newData);
     }
   }
 
@@ -42,10 +54,14 @@ export abstract class TcpCmdHandler {
     }
   }
 
-  protected parseData(data, state): boolean {
+  public setReminderData(data: Buffer) {
+    this.remainderData = data;
+  }
+
+  protected parseData(data, state): Result {
     if (state.ignore !== undefined && state.ignore()) {
       //console.log('ignored state parse');
-      return true;
+      return Result.Ok;
     }
 
     let expectLen = state.expectLen !== undefined ? state.expectLen() : 0;
@@ -54,7 +70,7 @@ export abstract class TcpCmdHandler {
     //console.log('before state handle availableData.length:', availableData === null ? 'null' : availableData.length);
     if (availableData == null) {
       console.log('no available data to parse');
-      return false;
+      return Result.MoreData;
     }
 
     if (availableData.length >= expectLen) {
@@ -62,14 +78,18 @@ export abstract class TcpCmdHandler {
       if (availableData.length == expectLen) {
         this.remainderData = null;
       } else {
-        this.remainderData = availableData.slice(expectLen);
+        if (expectLen == 0) {
+          this.remainderData = availableData;
+        } else {
+          this.remainderData = availableData.slice(expectLen);
+        }
       }
       //console.log('after state handle remainderData.length:', this.remainderData === null ? 'null' : this.remainderData.length);
-      return res;
+      return res ? Result.Ok : Result.Abort;
     } else {
       this.remainderData = availableData;
     }
-    return false;
+    return Result.MoreData;
   }
 
   protected initStates(): void {
