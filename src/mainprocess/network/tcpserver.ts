@@ -57,8 +57,10 @@ export class TcpServer {
   private onClientConnected(sock) {
     console.log(`client connected, remote port: ${sock.remotePort}, remote family: ${sock.remoteFamily}, address: ${sock.remoteAddress}`);
     let tcpDispatcher = new TcpCmdDispatcher({address: sock.remoteAddress, family: sock.remoteFamily, port: sock.remotePort});
+    //let allDataLen = 0;
     sock.on('data', (data) => {
       //console.log('received client data, length:', data.length);
+      //allDataLen += data.length;
       let res = tcpDispatcher.handle(data);
       if (res == Result.Abort) {
         sock.end();
@@ -75,6 +77,7 @@ export class TcpServer {
 
     sock.on('end', () => {
       console.log(`client closed, remote port: ${sock.remotePort}, remote family: ${sock.remoteFamily}, address: ${sock.remoteAddress}`);
+      //console.log('all data length:', allDataLen);
       tcpDispatcher.end();
     });
   }

@@ -1,41 +1,27 @@
 const fs = require('fs');
 const Int64 = require('node-int64');
 
+import { AuthPhoneCmdHandler } from './authphonecmdhandler';
 import { BufferUtil } from '../../utils/buffer';
 import { StorageManager } from '../../storage/storagemanager';
 import { Result, TcpCmdHandler } from '../tcpcmdhandler';
 import { TcpRemoteInfo } from '../remoteinfo';
 
 // Handle send file command from mobile device.
-export class CmdSendFile extends TcpCmdHandler {
+export class CmdSendFile extends AuthPhoneCmdHandler {
   private fileName = null;
   private fileNameLen = 0;
   private fileContentLen = 0;
   private recvFileLen = 0;
   private recvFd = null;
 
-  constructor(dataVer, rinfo: TcpRemoteInfo) {
-    super(rinfo);
-    this.dataVer = dataVer;
+  constructor(rinfo: TcpRemoteInfo, dataVer, cmd) {
+    super(rinfo, dataVer, cmd);
     this.initStates();
   }
 
-  public handle(data): Result {
-    if (this.innerHandler == null) {
-      //console.log(`current stateIndex: ${this.stateIndex}`);
-      if (this.stateIndex < this.states.length) {
-        let state = this.states[this.stateIndex];
-        state.handle(data);
-      } else {
-        console.log(`index out of states array, curr index: ${this.stateIndex}, states array length: ${this.states.length}`);
-      }
-      return Result.MoreData;
-    } else {
-      return this.innerHandler.handle(data);
-    }
-  }
-
   public end() {
+    super.end();
     if (this.innerHandler != null) {
       this.innerHandler.end();
     }
@@ -48,94 +34,48 @@ export class CmdSendFile extends TcpCmdHandler {
   }
 
   protected initStates() {
-    this.stateIndex = 0;
+    super.initStates();
     this.states.push({
-      handle: this.fileNameLengthParser.bind(this)
+      handle: this.fileNameLengthParser.bind(this),
+      expectLen: () => { return 4; }
     });
     this.states.push({
-      handle: this.fileNameParser.bind(this)
+      handle: this.fileNameParser.bind(this),
+      expectLen: () => { return this.fileNameLen; }
     });
     this.states.push({
-      handle: this.fileContentLengthParser.bind(this)
+      handle: this.fileContentLengthParser.bind(this),
+      expectLen: () => { return 8; }
     });
     this.states.push({
-      handle: this.fileContentParser.bind(this)
+      handle: this.fileContentParser.bind(this),
+      expectLen: () => { return -1; }
     });
   }
 
   // private methods
 
-  private fileNameLengthParser(data) {
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return;
-    }
-
-    if (availableData.length >= 4) {
-      this.fileNameLen = availableData.readInt32BE(0);
-      console.log(`read file name length: ${this.fileNameLen}`);
-      this.stateIndex += 1;
-      if (availableData.length == 4) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(4);
-        this.handle(null);
-      }
-    } else {
-      this.remainderData = availableData;
-    }
+  private fileNameLengthParser(data: Buffer): Result {
+    this.fileNameLen = data.readInt32BE(0);
+    console.log(`read file name length: ${this.fileNameLen}`);
+    return Result.Ok;
   }
 
-  private fileNameParser(data) {
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return;
-    }
-
-    if (availableData.length >= this.fileNameLen) {
-      this.fileName = availableData.toString('utf8', 0, this.fileNameLen);
-      console.log(`read file name: ${this.fileName}`);
-      this.stateIndex += 1;
-      if (availableData.length == this.fileNameLen) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(this.fileNameLen);
-        this.handle(null);
-      }
-    } else {
-      this.remainderData = availableData;
-    }
+  private fileNameParser(data: Buffer): Result {
+    this.fileName = data.toString('utf8', 0, this.fileNameLen);
+    console.log(`read file name: ${this.fileName}`);
+    return Result.Ok;
   }
 
-  private fileContentLengthParser(data) {
-    let expectLen = 8;
-    let availableData = BufferUtil.mergeBuffers(this.remainderData, data);
-    if (availableData == null) {
-      console.log('no available data to parse');
-      return;
-    }
-
-    if (availableData.length >= expectLen) {
-      let int64 = new Int64(availableData, 0);
-      this.fileContentLen = int64.toNumber(true);
-      console.log(`read file content length: ${this.fileContentLen}`);
-      this.stateIndex += 1;
-      if (availableData.length == expectLen) {
-        this.remainderData = null;
-      } else {
-        this.remainderData = availableData.slice(expectLen);
-      }
-      this.handle(this.remainderData);
-      this.remainderData = null;
-    } else {
-      this.remainderData = availableData;
-    }
+  private fileContentLengthParser(data: Buffer): Result {
+    let int64 = new Int64(data, 0);
+    this.fileContentLen = int64.toNumber(true);
+    console.log(`read file content length: ${this.fileContentLen}`);
+    return Result.Ok;
   }
 
-  private fileContentParser(data) {
-    if (this.recvFileLen == 0) {
+  private fileContentParser(data: Buffer): Result {
+    if (!this.recvFd) {
       this.recvFd = fs.openSync(StorageManager.getDefaultStorePath(this.fileName), 'wx');
       //console.log(`first write data, length: ${data.length}, recv fd: ${this.recvFd}`);
       fs.writeSync(this.recvFd, data, 0, data.length);
@@ -146,6 +86,12 @@ export class CmdSendFile extends TcpCmdHandler {
 
     if (data != null) {
       this.recvFileLen += data.length;
+      //console.log('recFile Len plus: ' + data.length + ', now is:' + this.recvFileLen);
     }
+    if (this.recvFileLen == this.fileContentLen) {
+      //console.log('recFileLen == fileContentLen, value:', this.recvFileLen);
+      return Result.Ok;
+    }
+    return Result.MoreData;
   }
 }

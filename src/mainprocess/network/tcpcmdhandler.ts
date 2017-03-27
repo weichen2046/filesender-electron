@@ -8,6 +8,9 @@ export enum Result {
   Abort,
 }
 
+export const INVALID_VERSION = -1;
+export const INVALID_CMD = -1;
+
 export abstract class TcpCmdHandler {
   protected _remoteInfo: TcpRemoteInfo = null;
   protected dataVer = -1;
@@ -17,8 +20,10 @@ export abstract class TcpCmdHandler {
   protected stateIndex = 0;
   protected states = [];
 
-  constructor(rinfo: TcpRemoteInfo) {
+  constructor(rinfo: TcpRemoteInfo, dataVer = INVALID_VERSION, cmd = INVALID_CMD) {
     this._remoteInfo = rinfo;
+    this.dataVer = dataVer;
+    this.cmd = cmd;
   }
 
   public handle(newData: Buffer): Result {
@@ -75,7 +80,8 @@ export abstract class TcpCmdHandler {
 
     if (availableData.length >= expectLen) {
       let res = state.handle(availableData, state);
-      if (availableData.length == expectLen) {
+      // expectLen == -1 means all available data will be consumed
+      if (availableData.length == expectLen || expectLen == -1) {
         this.remainderData = null;
       } else {
         if (expectLen == 0) {
@@ -85,7 +91,7 @@ export abstract class TcpCmdHandler {
         }
       }
       //console.log('after state handle remainderData.length:', this.remainderData === null ? 'null' : this.remainderData.length);
-      return res ? Result.Ok : Result.Abort;
+      return res;
     } else {
       this.remainderData = availableData;
     }
