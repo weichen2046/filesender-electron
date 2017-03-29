@@ -3,7 +3,7 @@ import { ChangeDetectorRef } from '@angular/core';
 
 import { ipcRenderer } from 'electron';
 
-import { Message } from '../../message/index';
+import { ASYNC_MSG, Message } from '../../message/index';
 import { Phone } from '../../message/index';
 
 @Component({
@@ -23,6 +23,12 @@ export class PhoneListComponent {
     return this._phones;
   }
 
+  public shareFiles(phone: Phone) {
+    let msg = new Message('share-files');
+    msg.obj = phone;
+    ipcRenderer.send(ASYNC_MSG, msg)
+  }
+
   private init() {
     ipcRenderer.on('phone-list-reply', (event, arg) => {
       console.log('async msg from main process', arg)
@@ -32,9 +38,8 @@ export class PhoneListComponent {
   }
 
   private retrievePhoneList() {
-    let msg = new Message();
-    msg.name = 'phone-list';
-    ipcRenderer.send('asynchronous-message', msg)
+    let msg = new Message('phone-list');
+    ipcRenderer.send(ASYNC_MSG, msg)
   }
 
   private onPhoneListRetrieved(_phones: Phone[]) {

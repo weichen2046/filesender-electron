@@ -1,7 +1,9 @@
 import { ipcMain } from 'electron';
-import { Message } from './msg';
-import { Runtime } from '../runtime';
+
+import { ASYNC_MSG, Message, SYNC_MSG } from './msg';
 import { Phone } from '../message/phone';
+import { Runtime } from '../runtime';
+import { ShareFileHandler } from './sharefilehandler';
 
 class MsgResult {
   reply: string;
@@ -11,22 +13,22 @@ class MsgResult {
 
 export class MessageCenter {
   public init() {
-    ipcMain.on('asynchronous-message', (event, arg) => {
+    ipcMain.on(ASYNC_MSG, (event, arg) => {
       let msg = arg as Message;
       let res = this.handleAsyncMsg(msg);
       if (res.reply) {
         event.sender.send(res.reply, res.arg);
       }
     });
-    ipcMain.on('synchronous-message', (event, arg) => {
+    ipcMain.on(SYNC_MSG, (event, arg) => {
       let msg = arg as Message;
       event.returnValue = this.handleSyncMsg(msg);
     })
   }
 
   public destroy() {
-    ipcMain.removeAllListeners('asynchronous-message');
-    ipcMain.removeAllListeners('synchronous-message');
+    ipcMain.removeAllListeners(ASYNC_MSG);
+    ipcMain.removeAllListeners(SYNC_MSG);
   }
 
   private handleAsyncMsg(msg: Message): MsgResult {
@@ -35,6 +37,10 @@ export class MessageCenter {
     if (msg.name == 'phone-list') {
       res.reply = 'phone-list-reply';
       res.arg = Runtime.instance.phones;
+    } else if (msg.name == 'share-files') {
+      let phone: Phone = msg.obj as Phone;
+      let handler = new ShareFileHandler(phone);
+      handler.handle();
     }
     return res;
   }
