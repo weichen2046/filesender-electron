@@ -2,19 +2,16 @@ const { NetUtils } = require('../../utils/network/netutils');
 
 import { config } from '../config';
 import { Phone } from '../../message/phone';
+import { UdpCmdHandler } from '../udpcmdhandler';
 import { UdpRemoteInfo } from '../remoteinfo';
 import { Runtime } from '../../runtime';
 
 const uuid = require('uuid');
 
 // Handle mobile device online command from mobile device.
-export class CmdPhoneOnline {
-  private _sock = null;
-  private _remoteInfo: UdpRemoteInfo;
-
+export class CmdPhoneOnline extends UdpCmdHandler {
   constructor(sock, rinfo: UdpRemoteInfo) {
-    this._sock = sock;
-    this._remoteInfo = rinfo;
+    super(sock, rinfo);
   }
 
   public handle(data: Buffer): boolean {

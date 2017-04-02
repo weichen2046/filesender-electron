@@ -1,17 +1,15 @@
 import { Phone } from '../../message/phone';
+import { UdpCmdHandler } from '../udpcmdhandler';
 import { UdpRemoteInfo } from '../remoteinfo';
 import { Runtime } from '../../runtime';
 
-export class AuthPhoneHandler {
-  protected _sock = null;
-  protected _remoteInfo: UdpRemoteInfo;
+export class AuthPhoneHandler extends UdpCmdHandler {
   protected _phone: Phone;
   protected _startOffset: number;
   protected _runtime: Runtime;
 
   constructor(sock, rinfo: UdpRemoteInfo) {
-    this._sock = sock;
-    this._remoteInfo = rinfo;
+    super(sock, rinfo);
   }
 
   public handle(data: Buffer): boolean {
