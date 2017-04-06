@@ -47,7 +47,7 @@ export class TcpCmdDispatcher extends TcpCmdHandler {
       case config.cmd.phone.cmd_send_file:
         this.innerHandler = new CmdSendFile(this._remoteInfo, this.dataVer, this.cmd);
         break;
-      case config.cmd.phone.cmd_send_file_request:
+      case config.cmd.phone.cmd_sending_file_request:
         this.innerHandler = new CmdSendFileRequest(this._remoteInfo, this.dataVer, this.cmd);
         break;
       default:
