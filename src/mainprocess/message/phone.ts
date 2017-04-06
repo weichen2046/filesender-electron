@@ -1,4 +1,7 @@
 export class Phone {
+  serialno: string;
+  islocal: boolean = false;
+  state: string;
   online: boolean = false;
   address: string;
   nickname: string;

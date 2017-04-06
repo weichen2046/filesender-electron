@@ -1,51 +1,49 @@
 import { ipcMain } from 'electron';
 
-import { ASYNC_MSG, Message, SYNC_MSG } from './msg';
+import * as MSG from './msg';
 import { Phone } from '../message/phone';
 import { Runtime } from '../runtime';
-import { ShareFileHandler } from './sharefilehandler';
-
-class MsgResult {
-  reply: string;
-  arg: any;
-  returnValue?: any;
-}
+import { ShareFileHandler } from './handler/sharefilehandler';
+import { AsyncMsgHandler } from './handler/asyncmsghandler';
+import { LocalPhoneListHandler } from './handler/localphonelist';
 
 export class MessageCenter {
   public init() {
-    ipcMain.on(ASYNC_MSG, (event, arg) => {
-      let msg = arg as Message;
-      let res = this.handleAsyncMsg(msg);
-      if (res.reply) {
-        event.sender.send(res.reply, res.arg);
-      }
+    ipcMain.on(MSG.ASYNC_MSG, (event, arg) => {
+      let msg = arg as MSG.Message;
+      let res = this.handleAsyncMsg(msg, event.sender);
     });
-    ipcMain.on(SYNC_MSG, (event, arg) => {
-      let msg = arg as Message;
+    ipcMain.on(MSG.SYNC_MSG, (event, arg) => {
+      let msg = arg as MSG.Message;
       event.returnValue = this.handleSyncMsg(msg);
     })
   }
 
   public destroy() {
-    ipcMain.removeAllListeners(ASYNC_MSG);
-    ipcMain.removeAllListeners(SYNC_MSG);
+    ipcMain.removeAllListeners(MSG.ASYNC_MSG);
+    ipcMain.removeAllListeners(MSG.SYNC_MSG);
   }
 
-  private handleAsyncMsg(msg: Message): MsgResult {
+  private handleAsyncMsg(msg: MSG.Message, sender: Electron.WebContents) {
     console.log('async msg from renderer process:', msg);
-    let res = new MsgResult();
-    if (msg.name == 'phone-list') {
-      res.reply = 'phone-list-reply';
-      res.arg = Runtime.instance.phones;
-    } else if (msg.name == 'share-files') {
-      let phone: Phone = msg.obj as Phone;
-      let handler = new ShareFileHandler(phone);
-      handler.handle();
+    let handler: AsyncMsgHandler = null;
+    switch (msg.name) {
+      case MSG.MSG_PHONE_LIST:
+        sender.send(MSG.MSG_PHONE_LIST_REPLY, Runtime.instance.phones);
+        break;
+      case MSG.MSG_SHARE_FILES:
+        handler = new ShareFileHandler(sender);
+        break;
+      case MSG.MSG_LOCAL_PHONE_LIST:
+        handler = new LocalPhoneListHandler(sender);
+        break;
     }
-    return res;
+    if (handler) {
+      handler.handle(msg);
+    }
   }
 
-  private handleSyncMsg(msg: Message) {
+  private handleSyncMsg(msg: MSG.Message) {
     console.log('sync msg from renderer process:', msg);
     return null;
   }
