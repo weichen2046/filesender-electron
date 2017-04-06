@@ -3,6 +3,8 @@ import { ChangeDetectorRef } from '@angular/core';
 
 import { ipcRenderer } from 'electron';
 
+import { Cmd, Environment } from '../../../environment.service';
+
 import * as MSG from '../../message/index';
 import { Phone } from '../../message/index';
 
@@ -14,7 +16,10 @@ import { Phone } from '../../message/index';
 export class PhoneListComponent {
   private _phones: Phone[] = [];
 
-  constructor(private _changeDetector: ChangeDetectorRef) {
+  constructor(
+    private _environment: Environment,
+    private _changeDetector: ChangeDetectorRef
+  ) {
     this.init();
     this.retrievePhoneList();
     this.retrieveLocalPhoneList();
@@ -29,6 +34,13 @@ export class PhoneListComponent {
     msg.obj = phone;
     ipcRenderer.send(MSG.ASYNC_MSG, msg)
   }
+
+  public showPhoneDetails(phone: Phone) {
+    let cmd = Cmd.obtain('show-phone-detail', phone);
+    this._environment.dispatchCmd(cmd);
+  }
+
+  // private methods
 
   private init() {
     ipcRenderer.on(MSG.MSG_PHONE_LIST_REPLY, (event, arg) => {

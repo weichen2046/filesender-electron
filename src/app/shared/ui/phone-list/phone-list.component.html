@@ -2,7 +2,8 @@
   <md-card class="phone-card" *ngFor="let phone of phones">
     <md-card-header>
       <div mat-card-avatar class="mat-card-avatar phone-header-image"></div>
-      <md-card-title>{{phone.address}}</md-card-title>
+      <md-card-title *ngIf="phone.islocal">{{phone.serialno}}</md-card-title>
+      <md-card-title *ngIf="!phone.islocal">{{phone.address}}</md-card-title>
       <md-card-subtitle *ngIf="phone.nickname">{{phone.nickname}}</md-card-subtitle>
       <md-card-subtitle *ngIf="!phone.nickname">Anonymous Phone</md-card-subtitle>
     </md-card-header>
@@ -12,7 +13,7 @@
     </md-card-content>
     -->
     <md-card-actions>
-      <button md-button>Details</button>
+      <button md-button (click)="showPhoneDetails(phone)">Details</button>
       <button md-button (click)="shareFiles(phone)">Share File(s)</button>
     </md-card-actions>
   </md-card>

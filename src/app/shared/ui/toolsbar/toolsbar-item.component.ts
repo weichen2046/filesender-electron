@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, AfterViewInit } from '@angular/core';
 
+import { Cmd, Environment } from '../../../environment.service';
 import { ToolsBarConfigItem } from './toolsbar-config-item';
-import { ToolsBarEventDispatcher } from './toolsbar-event-dispatcher';
 
 @Component({
   selector: 'app-toolsbar-item',
@@ -12,7 +12,9 @@ export class ToolsBarItemComponent implements OnInit, AfterViewInit {
   private _config: ToolsBarConfigItem;
   private _type: string = 'button';
   private _text: string = ''
-  private _eventDispatcher: ToolsBarEventDispatcher;
+
+  constructor(private environment: Environment) {
+  }
 
   ngOnInit() {
     //console.log('ToolsBarItemComponent ngOnInit');
@@ -38,14 +40,13 @@ export class ToolsBarItemComponent implements OnInit, AfterViewInit {
     return this._text;
   }
 
-  set eventdispatcher(dispatcher: ToolsBarEventDispatcher) {
-    this._eventDispatcher = dispatcher;
-  }
-
   public onClick() {
-    if (this._eventDispatcher) {
-        this._eventDispatcher.dispatchClick(this._config ? this._config.cmd : null);
+    if (!this._config) {
+      console.log('toolsbar item config not set');
+      return;
     }
-  }
 
+    let cmd = Cmd.obtain(this._config.cmd)
+    this.environment.dispatchCmd(cmd);
+  }
 }

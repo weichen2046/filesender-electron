@@ -56,10 +56,8 @@ export class ToolsBarComponent implements AfterViewInit, OnChanges {
         //console.log('config item:', item);
         let componentRef = this._itemAnchor.createComponent(componentFactory);
         componentRef.instance.configItem = item;
-        componentRef.instance.eventdispatcher = this._manager;
       });
       this._changeDetectorRef.detectChanges();
     });
   }
-
 }

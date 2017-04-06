@@ -1,7 +1,7 @@
 import { Component, ViewChild, AfterViewInit } from '@angular/core';
 import { ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 
-import { ToolsBarManager } from '../toolsbar/toolsbar-manager';
+import { Environment } from '../../../environment.service';
 import { ContentViewManager } from './contentview-manager';
 import { LeftViewManager, RightViewManager } from './contentview-manager';
 import { MiddleViewManager } from './middle-view-manager';
@@ -30,7 +30,8 @@ export class ContentViewComponent implements AfterViewInit {
   private _rightManager: RightViewManager;
 
   constructor(
-    private _componentFactoryResolver: ComponentFactoryResolver
+    private _componentFactoryResolver: ComponentFactoryResolver,
+    private _environment: Environment
   ) {
     this._manager = new ContentViewManager();
     this._leftManager = new LeftViewManager();
@@ -43,6 +44,10 @@ export class ContentViewComponent implements AfterViewInit {
     this._leftManager.attach(this._childAnchorLeft, this._componentFactoryResolver);
     this._middleManager.attach(this._childAnchorMidd, this._componentFactoryResolver);
     this._rightManager.attach(this._childAnchorRight, this._componentFactoryResolver);
+
+    this._environment.registerManager(this._leftManager);
+    this._environment.registerManager(this._middleManager);
+    this._environment.registerManager(this._rightManager);
   }
 
   public showLeft(show: boolean) {
@@ -59,12 +64,5 @@ export class ContentViewComponent implements AfterViewInit {
 
   get ismiddleshow(): boolean {
     return this._showMiddle;
-  }
-
-  public bindToolsBarManager(manager: ToolsBarManager) {
-    let handlers = this._middleManager.getToolsBarCmdHandlers();
-    handlers.forEach(item => {
-      manager.registerHandler(item.cmd, item.handler);
-    });
   }
 }

@@ -5,7 +5,7 @@
     {
       "type": "button",
       "text": "Show Phones",
-      "cmd": "toolsbar-cmd-showPhones",
+      "cmd": "show-phone-list",
       "icon": ""
     }
   ]

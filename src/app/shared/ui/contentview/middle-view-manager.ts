@@ -1,34 +1,24 @@
-import { ViewManager } from './view-manager';
+import { Cmd, Environment } from '../../../environment.service';
+import { ViewManager } from '../../../view-manager';
 
-import { TabViewComponent } from '../tabview/index';
 import { INVALID_TAB_ID } from '../tabview/index';
+import { TabViewComponent } from '../tabview/index';
 import { PhoneListComponent } from '../phone-list/index';
-
-import { ToolsBarHandlerItem } from '../toolsbar/toolsbar-handler-item';
-
-const CMD_SHOW_PHONES: string = 'toolsbar-cmd-showPhones';
 
 export class MiddleViewManager extends ViewManager {
   private _tabView: TabViewComponent;
 
-  public getToolsBarCmdHandlers(): ToolsBarHandlerItem[] {
-    let handlers: ToolsBarHandlerItem[] = [];
-    handlers.push({cmd: CMD_SHOW_PHONES, handler: this})
-    return handlers;
+  public init(environment: Environment) {
+    environment.registerHandler('show-phone-list', this.showPhoneList.bind(this));
+    environment.registerHandler('show-phone-detail', this.showPhoneDetails.bind(this));
   }
 
-  public handleCmd(cmd: string) {
-    switch(cmd) {
-      case CMD_SHOW_PHONES:
-        this.showPhones();
-        break;
-      default:
-        console.log('MiddleViewManager unknown toolsbar cmd:', cmd);
-        break;
-    }
+  public destroy(environment: Environment) {
+    environment.registerHandler('show-phone-list', this.showPhoneList);
+    environment.unregisterHandler('show-phone-detail', this.showPhoneDetails);
   }
 
-  private showPhones() {
+  private showPhoneList(cmd: Cmd) {
     console.log('open phone list component in a tab');
     if (!this._tabView) {
       let componentFactory = this._compFactoryResolver.resolveComponentFactory(TabViewComponent);
@@ -41,5 +31,9 @@ export class MiddleViewManager extends ViewManager {
       tabId = this._tabView.manager.createTab('phone-list', 'Phone List', PhoneListComponent);
     }
     this._tabView.manager.focusTab(tabId);
+  }
+
+  private showPhoneDetails(cmd: Cmd) {
+    console.log('show phone details in middle view');
   }
 }

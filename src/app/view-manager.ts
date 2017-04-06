@@ -1,8 +1,8 @@
 import { ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 
-import { ToolsBarCmdHandler } from '../toolsbar/toolsbar-cmd-handler';
+import { Environment } from './environment.service';
 
-export abstract class ViewManager implements ToolsBarCmdHandler {
+export abstract class ViewManager {
   protected _viewAnchor: ViewContainerRef;
   protected _compFactoryResolver: ComponentFactoryResolver;
 
@@ -11,6 +11,9 @@ export abstract class ViewManager implements ToolsBarCmdHandler {
     this._compFactoryResolver = compFactoryResolver;
   }
 
-  public handleCmd(cmd: string) {
+  public init(environment: Environment) {
+  }
+
+  public destroy(environment: Environment) {
   }
 }

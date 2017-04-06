@@ -1,7 +1,7 @@
 import { Component, ViewEncapsulation, ViewChild, AfterViewInit } from '@angular/core';
 import { OnInit } from '@angular/core';
 
-import { EnvironConfigService } from './environ-config.service';
+import { Environment } from './environment.service';
 
 import { ToolsBarComponent } from './shared/index';
 import { ContentViewComponent } from './shared/index';
@@ -23,14 +23,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(ContentViewComponent) _contentview: ContentViewComponent;
   @ViewChild(BottomStatusBarComponent) _statusbar: BottomStatusBarComponent;
 
-  constructor(private envConfig: EnvironConfigService) { }
+  constructor(private environment: Environment) { }
 
   ngOnInit() {
   }
 
   ngAfterViewInit() {
     //console.log('toolsbar.manager:', this._toolsbar.manager);
-    this._contentview.bindToolsBarManager(this._toolsbar.manager);
   }
 
   /*

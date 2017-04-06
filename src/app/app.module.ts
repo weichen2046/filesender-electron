@@ -5,7 +5,7 @@ import { HttpModule } from '@angular/http';
 import { MaterialModule } from '@angular/material';
 
 import { AppComponent } from './app.component';
-import { EnvironConfigService } from './environ-config.service';
+import { Environment } from './environment.service';
 
 import { UiModule } from './shared/index';
 
@@ -21,7 +21,7 @@ import { UiModule } from './shared/index';
     MaterialModule.forRoot(),
   ],
   providers: [
-    EnvironConfigService
+    Environment
   ],
   bootstrap: [AppComponent]
 })

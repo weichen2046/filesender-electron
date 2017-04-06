@@ -1,4 +1,4 @@
-import { ViewManager } from './view-manager';
+import { ViewManager } from '../../../view-manager';
 
 export class ContentViewManager {
 }
