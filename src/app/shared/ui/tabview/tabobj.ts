@@ -9,11 +9,12 @@ export class TabObj {
   isSingleton: boolean;
   manager: TabViewManager;
   focused: boolean = false;
+  createArgs: any;
 
   private static _idGenerator: number = 0;
 
   public static makeTab(manager: TabViewManager, name: string, title: string,
-    page: Type<any>, singleton = false): TabObj {
+    page: Type<any>, singleton: boolean, args: any): TabObj {
     let tab = new TabObj();
     tab.manager = manager;
     tab.id = TabObj._idGenerator++;
@@ -21,6 +22,7 @@ export class TabObj {
     tab.title = title;
     tab.pageComponent = page;
     tab.isSingleton = singleton;
+    tab.createArgs = args;
     return tab;
   }
 

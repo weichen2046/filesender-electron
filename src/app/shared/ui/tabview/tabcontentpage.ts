@@ -1,7 +1,7 @@
 import { TabObj } from "app/shared/ui/tabview/tabobj";
 
-export class TabContentPage {
-  tabObj: TabObj;
+export abstract class TabContentPage {
+  private _tabObj: TabObj;
 
   set active(state: boolean) {
     if (state != this.tabObj.focused) {
@@ -10,5 +10,16 @@ export class TabContentPage {
   }
   get active(): boolean {
     return this.tabObj.focused;
+  }
+
+  set tabObj(_tabObj: TabObj) {
+    this._tabObj = _tabObj;
+    this.onAttachTabObj(_tabObj);
+  }
+  get tabObj(): TabObj {
+    return this._tabObj;
+  }
+
+  public onAttachTabObj(tabObj: TabObj) {
   }
 }

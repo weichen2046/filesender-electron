@@ -19,7 +19,7 @@ export class TabViewManager {
     this._factoryResolver = resolver;
   }
 
-  public createTab(name: string, title: string, component: Type<any>, singleton = false) {
+  public createTab(name: string, title: string, component: Type<any>, singleton?: boolean, args?: any) {
     // add new tab to the tabview, this will create a new item in tabbar, and
     // init a `component` page show in the tabcontent.
     //console.log('tabview manager, _bar:', this._bar, '_content:', this._content);
@@ -29,7 +29,7 @@ export class TabViewManager {
         return tabId;
       }
     }
-    let tabObj = TabObj.makeTab(this, name, title, component, singleton);
+    let tabObj = TabObj.makeTab(this, name, title, component, (singleton) ? true : false, args);
     this._bar.addItem(title, tabObj);
     this._content.addContentView(component, tabObj);
     this._tabs.push(tabObj);

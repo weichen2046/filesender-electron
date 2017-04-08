@@ -38,7 +38,7 @@ export class MiddleViewManager extends ViewManager {
     let tabTitle = `Phone List`;
     let tabId = this._tabView.manager.findTab(tabName);
     if (tabId == INVALID_TAB_ID) {
-      tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneListComponent);
+      tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneListComponent, true);
     }
     this._tabView.manager.focusTab(tabId);
   }
@@ -51,7 +51,7 @@ export class MiddleViewManager extends ViewManager {
     let tabTitle = `Phone Details - ${phone.serialno}`;
     let tabId = this._tabView.manager.findTab(tabName);
     if (tabId == INVALID_TAB_ID) {
-      tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneDetailsComponent);
+      tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneDetailsComponent, true, phone);
     }
     this._tabView.manager.focusTab(tabId);
   }

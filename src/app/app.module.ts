@@ -18,7 +18,7 @@ import { UiModule } from './shared/index';
     FormsModule,
     HttpModule,
     UiModule,
-    MaterialModule.forRoot(),
+    MaterialModule,
   ],
   providers: [
     Environment
