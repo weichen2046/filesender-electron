@@ -41,7 +41,11 @@ function createWindow () {
   startNetworkServers();
 
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    icon: path.join(__dirname, 'assets/app-icon/png/256.png'),
+  })
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
