@@ -14,13 +14,14 @@ import { TabBarComponent } from './tabview/index';
 import { TabContentComponent } from './tabview/index';
 import { TabBarItemComponent } from './tabview/index';
 
-// tabview pages
-import { PhoneListComponent } from './phone-list/index';
-
 // toolsbar
 import { ToolsBarComponent } from './toolsbar/index';
 import { ToolsBarItemComponent } from './toolsbar/index';
+
+// tabview pages
+import { PhoneListComponent } from './phone-list/index';
 import { PhoneDetailsComponent } from "app/shared/ui/phone-details";
+import { PhoneCmdResultComponent } from "app/shared/ui/phone-cmd-result";
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { PhoneDetailsComponent } from "app/shared/ui/phone-details";
     ToolsBarItemComponent,
     PhoneListComponent,
     PhoneDetailsComponent,
+    PhoneCmdResultComponent,
   ],
   imports: [
     CommonModule,
@@ -49,6 +51,7 @@ import { PhoneDetailsComponent } from "app/shared/ui/phone-details";
   entryComponents: [
     PhoneListComponent,
     PhoneDetailsComponent,
+    PhoneCmdResultComponent,
   ],
 })
 export class UiModule { }

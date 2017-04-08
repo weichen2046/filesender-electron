@@ -98,6 +98,8 @@ export class Environment {
       handlers.forEach((handle: CmdHandlerFunc) => {
         handle(cmd);
       });
+    } else {
+      console.log(`unknown cmd: ${cmd.id}`);
     }
   }
 }

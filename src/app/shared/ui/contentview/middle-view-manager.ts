@@ -6,18 +6,30 @@ import { TabViewComponent } from '../tabview/index';
 import { PhoneListComponent } from '../phone-list/index';
 import { Phone } from "app/shared/message";
 import { PhoneDetailsComponent } from "app/shared/ui/phone-details";
+import { PhoneCmdResultComponent } from "app/shared/ui/phone-cmd-result";
 
 export class MiddleViewManager extends ViewManager {
   private _tabView: TabViewComponent;
+  private _cmdHandlers = {};
 
   public init(environment: Environment) {
-    environment.registerHandler('show-phone-list', this.showPhoneList.bind(this));
-    environment.registerHandler('show-phone-detail', this.showPhoneDetails.bind(this));
+    this._cmdHandlers['show-phone-list'] = this.showPhoneList.bind(this);
+    this._cmdHandlers['show-phone-detail'] = this.showPhoneDetails.bind(this);
+    this._cmdHandlers['show-phone-cmd-result'] = this.showPhoneCmdResult.bind(this);
+
+    for (let cmd in this._cmdHandlers) {
+      if (this._cmdHandlers.hasOwnProperty(cmd)) {
+        environment.registerHandler(cmd, this._cmdHandlers[cmd]);
+      }
+    }
   }
 
   public destroy(environment: Environment) {
-    environment.registerHandler('show-phone-list', this.showPhoneList);
-    environment.unregisterHandler('show-phone-detail', this.showPhoneDetails);
+    for (let cmd in this._cmdHandlers) {
+      if (this._cmdHandlers.hasOwnProperty(cmd)) {
+        environment.unregisterHandler(cmd, this._cmdHandlers[cmd]);
+      }
+    }
   }
 
   // private methods
@@ -32,14 +44,11 @@ export class MiddleViewManager extends ViewManager {
   }
 
   private showPhoneList(cmd: Cmd) {
-    console.log('open phone list component in a tab');
+    //console.log('open phone list component in a tab');
     this.makeSureTabViewContainer();
     let tabName = `phone-list`;
     let tabTitle = `Phone List`;
-    let tabId = this._tabView.manager.findTab(tabName);
-    if (tabId == INVALID_TAB_ID) {
-      tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneListComponent, true);
-    }
+    let tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneListComponent, true);
     this._tabView.manager.focusTab(tabId);
   }
 
@@ -49,10 +58,15 @@ export class MiddleViewManager extends ViewManager {
     this.makeSureTabViewContainer();
     let tabName = `phone-detail-${phone.serialno}`;
     let tabTitle = `Phone Details - ${phone.serialno}`;
-    let tabId = this._tabView.manager.findTab(tabName);
-    if (tabId == INVALID_TAB_ID) {
-      tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneDetailsComponent, true, phone);
-    }
+    let tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneDetailsComponent, true, phone);
+    this._tabView.manager.focusTab(tabId);
+  }
+
+  private showPhoneCmdResult(cmd: Cmd) {
+    this.makeSureTabViewContainer();
+    let tabName = `phone-cmd-result`;
+    let tabTitle = `Phone Cmd Result`;
+    let tabId = this._tabView.manager.createTab(tabName, tabTitle, PhoneCmdResultComponent, false, cmd.args);
     this._tabView.manager.focusTab(tabId);
   }
 }
