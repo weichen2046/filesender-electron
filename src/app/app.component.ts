@@ -23,13 +23,17 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(ContentViewComponent) _contentview: ContentViewComponent;
   @ViewChild(BottomStatusBarComponent) _statusbar: BottomStatusBarComponent;
 
-  constructor(private environment: Environment) { }
+  constructor(private _environment: Environment) { }
 
   ngOnInit() {
   }
 
   ngAfterViewInit() {
     //console.log('toolsbar.manager:', this._toolsbar.manager);
+  }
+
+  get environment(): Environment {
+    return this._environment;
   }
 
   /*
