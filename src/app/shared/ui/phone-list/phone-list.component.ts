@@ -7,19 +7,22 @@ import { Cmd, Environment } from '../../../environment.service';
 
 import * as MSG from '../../message/index';
 import { Phone } from '../../message/index';
+import { TabContentPage } from "app/shared/ui/tabview";
+import { TabObj } from "app/shared/ui/tabview/tabobj";
 
 @Component({
   selector: 'app-phone-list',
   templateUrl: './phone-list.component.html',
   styleUrls: [ './phone-list.component.scss' ]
 })
-export class PhoneListComponent {
+export class PhoneListComponent extends TabContentPage {
   private _phones: Phone[] = [];
 
   constructor(
     private _environment: Environment,
     private _changeDetector: ChangeDetectorRef
   ) {
+    super();
     this.init();
     this.retrievePhoneList();
     this.retrieveLocalPhoneList();

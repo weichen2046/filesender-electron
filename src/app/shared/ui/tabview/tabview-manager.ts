@@ -29,23 +29,27 @@ export class TabViewManager {
         return tabId;
       }
     }
-    let tab = TabObj.makeTab(name, title, component, true);
-    this._bar.addItem(title);
-    this._content.addContentView(component);
-    this._tabs.push(tab);
-    return tab.id;
+    let tabObj = TabObj.makeTab(this, name, title, component, singleton);
+    this._bar.addItem(title, tabObj);
+    this._content.addContentView(component, tabObj);
+    this._tabs.push(tabObj);
+    return tabObj.id;
   }
 
   public focusTab(tabId: number) {
+    // highlight focused tabbar item
+    this._bar.focusTab(tabId);
+    // hide none focused tabcontent
+    this._content.focusTab(tabId)
   }
 
   public findTab(name: string): number {
     if (!name) {
       return INVALID_TAB_ID;
     }
-    let res = this._tabs.find(tab => tab.name == name);
-    if (res) {
-      return res.id;
+    let tabObj = this._tabs.find(tab => tab.name == name);
+    if (tabObj) {
+      return tabObj.id;
     }
     return INVALID_TAB_ID;
   }

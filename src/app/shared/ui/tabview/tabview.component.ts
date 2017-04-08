@@ -1,4 +1,4 @@
-import { OnInit, Component, ViewChild, AfterViewInit, ComponentFactoryResolver } from '@angular/core';
+import { OnInit, Component, ViewChild, AfterViewInit, ComponentFactoryResolver, ViewEncapsulation } from '@angular/core';
 
 import { TabViewManager } from './tabview-manager';
 import { TabBarComponent } from './tabbar.component';
@@ -6,7 +6,9 @@ import { TabContentComponent } from './tabcontent.component';
 
 @Component({
   selector: 'tabview',
-  templateUrl: './tabview.component.html'
+  templateUrl: './tabview.component.html',
+  styleUrls: [ './tabview.component.scss' ],
+  encapsulation: ViewEncapsulation.None
 })
 export class TabViewComponent implements OnInit, AfterViewInit {
   private _manager: TabViewManager;

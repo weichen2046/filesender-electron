@@ -1,0 +1,13 @@
+tabbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+app-tabbar-item {
+  flex: 1;
+}
+
+.tabcontentpage {
+  padding-top: 10px;
+}

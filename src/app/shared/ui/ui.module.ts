@@ -20,6 +20,7 @@ import { PhoneListComponent } from './phone-list/index';
 // toolsbar
 import { ToolsBarComponent } from './toolsbar/index';
 import { ToolsBarItemComponent } from './toolsbar/index';
+import { PhoneDetailsComponent } from "app/shared/ui/phone-details";
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { ToolsBarItemComponent } from './toolsbar/index';
     ToolsBarComponent,
     ToolsBarItemComponent,
     PhoneListComponent,
+    PhoneDetailsComponent,
   ],
   imports: [
     CommonModule,
@@ -46,6 +48,7 @@ import { ToolsBarItemComponent } from './toolsbar/index';
   ],
   entryComponents: [
     PhoneListComponent,
+    PhoneDetailsComponent,
   ],
 })
 export class UiModule { }
