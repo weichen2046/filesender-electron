@@ -14,7 +14,7 @@
     -->
     <md-card-actions>
       <button md-button (click)="showPhoneDetails(phone)">Details</button>
-      <button md-button (click)="shareFiles(phone)">Share File(s)</button>
+      <button md-button [disabled]="phone.accessToken?false:true" (click)="shareFiles(phone)">Share File(s)</button>
     </md-card-actions>
   </md-card>
 </div>
