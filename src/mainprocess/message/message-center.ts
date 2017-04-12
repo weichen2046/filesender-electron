@@ -5,6 +5,7 @@ import { Phone } from '../message/phone';
 import { Runtime } from '../runtime';
 import { ShareFileHandler } from './handler/sharefilehandler';
 import { AsyncMsgHandler } from './handler/asyncmsghandler';
+import { RunCmdHandler } from "./handler/runcmdhandler";
 import { LocalPhoneListHandler } from './handler/localphonelist';
 
 export class MessageCenter {
@@ -36,6 +37,9 @@ export class MessageCenter {
         break;
       case MSG.MSG_LOCAL_PHONE_LIST:
         handler = new LocalPhoneListHandler(sender);
+        break;
+      case MSG.MSG_RUN_CMD:
+        handler = new RunCmdHandler(sender);
         break;
     }
     if (handler) {

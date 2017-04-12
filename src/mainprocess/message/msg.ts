@@ -5,10 +5,12 @@ export const SYNC_MSG = 'synchronous-message';
 export const MSG_SHARE_FILES = 'share-files';
 export const MSG_PHONE_LIST = 'phone-list';
 export const MSG_LOCAL_PHONE_LIST = 'local-phone-list';
+export const MSG_RUN_CMD = 'run-cmd';
 
 // main -> renderer
 export const MSG_PHONE_LIST_REPLY = 'phone-list-reply';
 export const MSG_LOCAL_PHONE_LIST_REPLY = 'local-phone-list-reply';
+export const MSG_RUN_CMD_REPLY = 'run-cmd-reply';
 
 export class Message {
   name: string;

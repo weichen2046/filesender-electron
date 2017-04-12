@@ -23,7 +23,6 @@ export class PhoneListComponent extends TabContentPage {
     private _changeDetector: ChangeDetectorRef
   ) {
     super();
-    this.init();
     this.retrievePhoneList();
     this.retrieveLocalPhoneList();
   }
@@ -43,9 +42,9 @@ export class PhoneListComponent extends TabContentPage {
     this._environment.dispatchCmd(cmd);
   }
 
-  // private methods
+  // protected methods
 
-  private init() {
+  protected onInit() {
     ipcRenderer.on(MSG.MSG_PHONE_LIST_REPLY, (event, arg) => {
       let phones = arg as Phone[];
       this.onPhoneListRetrieved(phones);
@@ -55,6 +54,8 @@ export class PhoneListComponent extends TabContentPage {
       this.onLocalPhoneListRetrieved(phones);
     });
   }
+
+  // private methods
 
   private retrievePhoneList() {
     let msg = new MSG.Message(MSG.MSG_PHONE_LIST);

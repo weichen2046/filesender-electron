@@ -3,6 +3,10 @@ import { TabObj } from "app/shared/ui/tabview/tabobj";
 export abstract class TabContentPage {
   private _tabObj: TabObj;
 
+  constructor() {
+    this.init();
+  }
+
   set active(state: boolean) {
     if (state != this.tabObj.focused) {
       console.log(`Tab content page active state not match with tab bar`);
@@ -21,5 +25,16 @@ export abstract class TabContentPage {
   }
 
   public onAttachTabObj(tabObj: TabObj) {
+  }
+
+  // protected methods
+
+  protected onInit() {
+  }
+
+  // private methods
+
+  private init() {
+    this.onInit();
   }
 }
