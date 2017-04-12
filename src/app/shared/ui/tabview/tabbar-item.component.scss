@@ -1,6 +1,23 @@
-.active {
-  font-weight: bold;
+.tabbaritem-container.active {
   background-color: #ffffff;
+}
+
+.title.active {
+  font-weight: bold;
+}
+
+.material-icons.close:hover {
+  color: #FF0000;
+}
+
+.material-icons.close:active {
+  color: #CC0000;
+}
+
+.tabbaritem-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .tabbaritem-container:hover {

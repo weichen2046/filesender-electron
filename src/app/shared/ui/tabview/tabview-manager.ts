@@ -53,4 +53,12 @@ export class TabViewManager {
     }
     return INVALID_TAB_ID;
   }
+
+  public closeTab(tabObj: TabObj) {
+    //console.log('try to close tab:', tabObj);
+    // remote tabbar item and release resource
+    this._bar.closeTab(tabObj.id);
+    // remote tabcontent content  and release resource
+    this._content.closeTab(tabObj.id);
+  }
 }

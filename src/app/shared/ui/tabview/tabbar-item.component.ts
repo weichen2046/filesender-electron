@@ -21,4 +21,8 @@ export class TabBarItemComponent {
   public onClick() {
     this.tabObj.focus();
   }
+
+  public close() {
+    this.tabObj.close();
+  }
 }

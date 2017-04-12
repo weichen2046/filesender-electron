@@ -1,3 +1,4 @@
 <div class="tabbaritem-container" [class.active]="active" (click)="onClick()">
-  {{title}}
+  <span class="title" [class.active]="active">{{title}}</span>
+  <i class="material-icons close" (click)="close()">close</i>
 </div>

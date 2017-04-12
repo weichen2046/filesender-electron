@@ -33,4 +33,8 @@ export class TabContentComponent {
     });
     this._changeDetector.detectChanges();
   }
+
+  public closeTab(tabId: number) {
+    // TODO: remove tabcontent component
+  }
 }

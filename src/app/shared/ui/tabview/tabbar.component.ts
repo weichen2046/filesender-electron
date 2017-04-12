@@ -38,4 +38,8 @@ export class TabBarComponent implements AfterViewInit {
     });
     this._changeDetector.detectChanges();
   }
+
+  public closeTab(tabId: number) {
+    // TODO: remove tabbar-item component
+  }
 }

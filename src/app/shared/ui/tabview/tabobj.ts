@@ -32,4 +32,8 @@ export class TabObj {
     }
     this.manager.focusTab(this.id);
   }
+
+  public close() {
+    this.manager.closeTab(this);
+  }
 }
