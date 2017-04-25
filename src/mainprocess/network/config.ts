@@ -8,6 +8,7 @@ export const config = {
       'cmd_request_auth'              : 4,
       'cmd_sending_file_request'      : 5,
       'cmd_exchange_tcp_port'         : 6,
+      'cmd_send_file'                 : 7,
     },
     // phone -> desktop
     phone: {
