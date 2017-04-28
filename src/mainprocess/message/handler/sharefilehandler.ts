@@ -2,6 +2,7 @@ const dgram = require('dgram');
 const fs = require('fs');
 const net = require('net');
 const Int64 = require('node-int64');
+const path = require('path');
 import { dialog } from 'electron';
 
 import { config } from '../../network/config';
@@ -49,8 +50,8 @@ export class ShareFileHandler extends AsyncMsgHandler {
       // 4 bytes access token length
       // x bytes access token
       // 4 bytes paths length
-      // 4 bytes Nth path length
-      // x bytes Nth path
+      // 4 bytes Nth file name length
+      // x bytes Nth file name
       // 4 bytes Nth file content length
       // x bytes Nth file content
 
@@ -77,22 +78,24 @@ export class ShareFileHandler extends AsyncMsgHandler {
       allDataLen += 4;
 
       let pathsLen = paths.length;
-      paths.forEach(path => {
-        // write Nth path length
-        intBuff.writeInt32BE(path.length, 0);
+      paths.forEach(fullpath => {
+        // get file name from path
+        let filename = path.basename(fullpath);
+        // write Nth filename length
+        intBuff.writeInt32BE(filename.length, 0);
         client.write(intBuff);
         allDataLen += 4;
-        // write Nth path name
-        client.write(path);
-        allDataLen += path.length;
+        // write Nth file name
+        client.write(filename);
+        allDataLen += filename.length;
         // wirte Nth file content length
-        let stats = fs.statSync(path);
+        let stats = fs.statSync(fullpath);
         let fileSizeInBytes = stats.size
-        console.log('write path:', path, 'file size:', fileSizeInBytes);
+        console.log('write path:', fullpath, 'file size:', fileSizeInBytes);
         client.write(new Int64(fileSizeInBytes).toBuffer());
         allDataLen += 8;
         // write Nth file content
-        let readStream = fs.createReadStream(path);
+        let readStream = fs.createReadStream(fullpath);
         readStream.on('data', (chunk) => {
           client.write(chunk);
           allDataLen += chunk.length;
@@ -129,9 +132,9 @@ export class ShareFileHandler extends AsyncMsgHandler {
       let phone = this._phone;
       let dataLen = 4 + 4 + 4 + phone.accessToken.length + 4;
       let allPathByteLen = 0;
-      paths.forEach(path => {
+      paths.forEach(fullpath => {
         allPathByteLen += 4;
-        allPathByteLen += path.length;
+        allPathByteLen += fullpath.length;
       });
       dataLen += allPathByteLen;
       let msg = Buffer.alloc(dataLen);
@@ -152,13 +155,13 @@ export class ShareFileHandler extends AsyncMsgHandler {
       msg.writeInt32BE(paths.length, buffOffset);
 
       buffOffset += 4;
-      paths.forEach(path => {
+      paths.forEach(fullpath => {
         // write nth path length
-        msg.writeInt32BE(path.length, buffOffset);
+        msg.writeInt32BE(fullpath.length, buffOffset);
         // write nth path
         buffOffset += 4;
-        msg.write(path, buffOffset);
-        buffOffset += path.length;
+        msg.write(fullpath, buffOffset);
+        buffOffset += fullpath.length;
       });
       client.write(msg, () => {
         console.log(`client write ${dataLen} bytes`);
@@ -184,9 +187,9 @@ export class ShareFileHandler extends AsyncMsgHandler {
       let phone = this._phone;
       let dataLen = 4 + 4 + 4 + phone.accessToken.length + 4;
       let allPathByteLen = 0;
-      paths.forEach(path => {
+      paths.forEach(fullpath => {
         allPathByteLen += 4;
-        allPathByteLen += path.length;
+        allPathByteLen += fullpath.length;
       });
       dataLen += allPathByteLen;
       let msg = Buffer.alloc(dataLen);
@@ -207,13 +210,13 @@ export class ShareFileHandler extends AsyncMsgHandler {
       msg.writeInt32BE(paths.length, buffOffset);
 
       buffOffset += 4;
-      paths.forEach(path => {
+      paths.forEach(fullpath => {
         // write nth path length
-        msg.writeInt32BE(path.length, buffOffset);
+        msg.writeInt32BE(fullpath.length, buffOffset);
         // write nth path
         buffOffset += 4;
-        msg.write(path, buffOffset);
-        buffOffset += path.length;
+        msg.write(fullpath, buffOffset);
+        buffOffset += fullpath.length;
       });
       client.send(msg, phone.udpPort, phone.address, (err) => {
         client.close();
