@@ -13,6 +13,11 @@ import { IPhone } from "mainprocess/message/iphone";
 
 export class ShareFileHandler extends AsyncMsgHandler {
   private _phone: Phone;
+  private _paths: string[];
+  private _currentSendingFileIndex = 0;
+  private _sock;
+  private _allDataSent = 0;
+
   constructor(sender: Electron.WebContents) {
     super(sender);
   }
@@ -31,18 +36,19 @@ export class ShareFileHandler extends AsyncMsgHandler {
       // send file sending request
       // send file
       //this.sendSendingFileRequestTcp(paths);
-      this.sendFile(paths);
+      this._paths = paths;
+      this.sendFiles(paths);
     });
   }
 
-  private sendFile(paths: string[]) {
+  private sendFiles(paths: string[]) {
     if (!this._phone.isAuthenticated()) {
       console.log('can not share file to unauthenticated phone');
       return;
     }
 
-    let allDataLen = 0;
     let client = new net.Socket();
+    this._sock = client;
     client.connect(this._phone.tcpPort, this._phone.address, () => {
       console.log('send file tcp client connected');
       // 4 bytes data version
@@ -60,57 +66,68 @@ export class ShareFileHandler extends AsyncMsgHandler {
       // write data version
       intBuff.writeInt32BE(config.tcp.dataVer, 0);
       client.write(intBuff);
-      allDataLen += 4;
+      this._allDataSent += 4;
       // write cmd
       intBuff.writeInt32BE(config.cmd.pc.cmd_send_file, 0);
       client.write(intBuff);
-      allDataLen += 4;
+      this._allDataSent += 4;
       // write access token length
       intBuff.writeInt32BE(phone.accessToken.length, 0);
       client.write(intBuff);
-      allDataLen += 4;
+      this._allDataSent += 4;
       // write access token
       client.write(phone.accessToken);
-      allDataLen += phone.accessToken.length;
+      this._allDataSent += phone.accessToken.length;
       // write paths length
       intBuff.writeInt32BE(paths.length, 0);
       client.write(intBuff);
-      allDataLen += 4;
-
-      let pathsLen = paths.length;
-      paths.forEach(fullpath => {
-        // get file name from path
-        let filename = path.basename(fullpath);
-        // write Nth filename length
-        intBuff.writeInt32BE(filename.length, 0);
-        client.write(intBuff);
-        allDataLen += 4;
-        // write Nth file name
-        client.write(filename);
-        allDataLen += filename.length;
-        // wirte Nth file content length
-        let stats = fs.statSync(fullpath);
-        let fileSizeInBytes = stats.size
-        console.log('write path:', fullpath, 'file size:', fileSizeInBytes);
-        client.write(new Int64(fileSizeInBytes).toBuffer());
-        allDataLen += 8;
-        // write Nth file content
-        let readStream = fs.createReadStream(fullpath);
-        readStream.on('data', (chunk) => {
-          client.write(chunk);
-          allDataLen += chunk.length;
-        });
-        readStream.on('end', () => {
-          pathsLen -= 1;
-          if (pathsLen == 0) {
-            client.end();
-          }
-        });
-      });
+      this._allDataSent += 4;
+      this.asyncSendFileOrdered();
     });
     client.on('close', () => {
-      console.log('send file tcp client closed, all data send:', allDataLen);
+      console.log('send file tcp client closed, all data send:', this._allDataSent);
       client = null;
+    });
+  }
+
+  private asyncSendFileOrdered() {
+    if (this._currentSendingFileIndex >= this._paths.length) {
+      console.log(this._paths.length, 'files sent');
+      return;
+    }
+
+    console.log(`send file[${this._currentSendingFileIndex}]: ${this._paths[this._currentSendingFileIndex]}`);
+    let intBuff = Buffer.alloc(4);
+    let client = this._sock;
+    let fullpath = this._paths[this._currentSendingFileIndex];
+    // get file name from path
+    let filename = path.basename(fullpath);
+    // write Nth filename length
+    intBuff.writeInt32BE(filename.length, 0);
+    client.write(intBuff);
+    this._allDataSent += 4;
+    // write Nth file name
+    client.write(filename);
+    this._allDataSent += filename.length;
+    // wirte Nth file content length
+    let stats = fs.statSync(fullpath);
+    let fileSizeInBytes = stats.size
+    console.log('write path:', fullpath, 'file size:', fileSizeInBytes, 'file name length:', filename.length);
+    client.write(new Int64(fileSizeInBytes).toBuffer());
+    this._allDataSent += 8;
+    // write Nth file content
+    let readStream = fs.createReadStream(fullpath);
+    readStream.on('data', (chunk) => {
+      client.write(chunk);
+      this._allDataSent += chunk.length;
+    });
+    readStream.on('end', () => {
+      this._currentSendingFileIndex += 1;
+      if (this._currentSendingFileIndex == this._paths.length) {
+        client.end();
+      } else {
+        setTimeout(this.asyncSendFileOrdered.bind(this), 0);
+      }
     });
   }
 
