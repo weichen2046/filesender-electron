@@ -103,16 +103,17 @@ export class ShareFileHandler extends AsyncMsgHandler {
     // get file name from path
     let filename = path.basename(fullpath);
     // write Nth filename length
-    intBuff.writeInt32BE(filename.length, 0);
+    let fileNameLength = Buffer.byteLength(filename);
+    intBuff.writeInt32BE(fileNameLength, 0);
     client.write(intBuff);
     this._allDataSent += 4;
     // write Nth file name
     client.write(filename);
-    this._allDataSent += filename.length;
+    this._allDataSent += fileNameLength;
     // wirte Nth file content length
     let stats = fs.statSync(fullpath);
     let fileSizeInBytes = stats.size
-    console.log('write path:', fullpath, 'file size:', fileSizeInBytes, 'file name length:', filename.length);
+    console.log('write path:', fullpath, 'file size:', fileSizeInBytes, 'file name length:', fileNameLength, 'file name:', filename);
     client.write(new Int64(fileSizeInBytes).toBuffer());
     this._allDataSent += 8;
     // write Nth file content
