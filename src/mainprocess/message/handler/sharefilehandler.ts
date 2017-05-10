@@ -10,6 +10,7 @@ import { Phone } from '../phone';
 import { Message } from '../msg';
 import { AsyncMsgHandler } from './asyncmsghandler';
 import { IPhone } from "mainprocess/message/iphone";
+import { Runtime } from '../../runtime';
 
 export class ShareFileHandler extends AsyncMsgHandler {
   private _phone: Phone;
@@ -65,6 +66,7 @@ export class ShareFileHandler extends AsyncMsgHandler {
       client.write(intBuff);
       this._allDataSent += 4;
       // write access token length
+      //console.log('use phone access token to send file request:', phone.accessToken);
       intBuff.writeInt32BE(phone.accessToken.length, 0);
       client.write(intBuff);
       this._allDataSent += 4;
@@ -76,9 +78,11 @@ export class ShareFileHandler extends AsyncMsgHandler {
       client.write(intBuff);
       this._allDataSent += 4;
 
+      let runtime = Runtime.instance;
       paths.forEach(fullpath => {
         // get file name from path
         let filename = path.basename(fullpath);
+        let fileid = runtime.pendingFileManager.addPendingFile(filename);
         // write Nth file name length
         let fileNameLength = Buffer.byteLength(filename);
         intBuff.writeInt32BE(fileNameLength, 0);
@@ -87,7 +91,15 @@ export class ShareFileHandler extends AsyncMsgHandler {
         // write Nth file name
         client.write(filename);
         this._allDataSent += fileNameLength;
+        // write Nth file id length
+        intBuff.writeInt32BE(fileid.length, 0);
+        client.write(intBuff);
+        this._allDataSent += 4;
+        // write Nth file id
+        client.write(fileid);
+        this._allDataSent += fileid.length;
       });
+      runtime.pendingFileManager.sendDelayMessage();
       client.end();
     });
     client.on('close', () => {

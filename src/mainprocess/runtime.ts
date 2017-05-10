@@ -2,11 +2,18 @@ import { Phone } from './message/phone';
 
 const uuid = require('uuid');
 
+import { PendingSendingFile, PendingSendingFileManager } from './runtimex';
+
 export class Runtime {
   private static _instance: Runtime;
   private _phones: Phone[] = [];
-
   private _tempAccessToken: string;
+
+  public pendingFileManager: PendingSendingFileManager;
+
+  constructor() {
+    this.pendingFileManager = new PendingSendingFileManager();
+  }
 
   static get instance(): Runtime {
     if (!Runtime._instance) {
