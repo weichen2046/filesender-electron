@@ -1,6 +1,6 @@
 export const config = {
   cmd: {
-    // desktop -> phone
+    // device -> phone
     pc: {
       'cmd_pc_online'                 : 1,
       'cmd_pc_offline'                : 2,
@@ -10,14 +10,15 @@ export const config = {
       'cmd_exchange_tcp_port'         : 6,
       'cmd_send_file'                 : 7,
     },
-    // phone -> desktop
+    // phone -> device
     phone: {
-      'cmd_phone_online'              : 1,
-      'cmd_phone_offline'             : 2,
-      'cmd_send_file'                 : 3,
-      'cmd_sending_file_request'      : 4,
-      'cmd_confirm_auth_request'      : 5,
-      'cmd_confirm_exchange_tcp_port' : 6,
+      'cmd_phone_online'                  : 1,
+      'cmd_phone_offline'                 : 2,
+      'cmd_send_file'                     : 3,
+      'cmd_sending_file_request'          : 4,
+      'cmd_confirm_auth_request'          : 5,
+      'cmd_confirm_exchange_tcp_port'     : 6,
+      'cmd_confirm_sending_file_request'  : 7,
     }
   },
   tcp: {

@@ -24,6 +24,7 @@ export abstract class TcpCmdHandler {
     this._remoteInfo = rinfo;
     this.dataVer = dataVer;
     this.cmd = cmd;
+    this.initStates();
   }
 
   public handle(newData: Buffer): Result {
@@ -100,7 +101,8 @@ export abstract class TcpCmdHandler {
 
   protected initStates(): void {
     this.stateIndex = 0;
+    this.onInitStates();
   }
-  protected allDataRecved(): void {
-  }
+  protected onInitStates(): void {}
+  protected allDataRecved(): void {}
 }

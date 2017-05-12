@@ -82,7 +82,7 @@ export class ShareFileHandler extends AsyncMsgHandler {
       paths.forEach(fullpath => {
         // get file name from path
         let filename = path.basename(fullpath);
-        let fileid = runtime.pendingFileManager.addPendingFile(filename);
+        let fileid = runtime.pendingFileManager.addPendingConfirmFile(filename, fullpath);
         // write Nth file name length
         let fileNameLength = Buffer.byteLength(filename);
         intBuff.writeInt32BE(fileNameLength, 0);

@@ -1,6 +1,7 @@
 import { config } from './config';
-import { CmdSendFile } from './tcphandler/sendfile';
-import { CmdSendFileRequest } from './tcphandler/sendfilerequest';
+import { CmdSendFile } from './tcphandler/sendfilehandler';
+import { CmdSendFileRequest } from './tcphandler/sendfilerequesthandler';
+import { CmdConfirmSendingFileRequest } from './tcphandler/confirmsendingfilerequest';
 
 import { TcpRemoteInfo } from './remoteinfo';
 import { Result, TcpCmdHandler } from './tcpcmdhandler';
@@ -49,6 +50,9 @@ export class TcpCmdDispatcher extends TcpCmdHandler {
         break;
       case config.cmd.phone.cmd_sending_file_request:
         this.innerHandler = new CmdSendFileRequest(this._remoteInfo, this.dataVer, this.cmd);
+        break;
+      case config.cmd.phone.cmd_confirm_sending_file_request:
+        this.innerHandler = new CmdConfirmSendingFileRequest(this._remoteInfo, this.dataVer, this.cmd);
         break;
       default:
         console.log(`unknown cmd to dispatch cmd: ${cmd}`);

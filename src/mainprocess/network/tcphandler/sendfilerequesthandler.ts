@@ -10,7 +10,7 @@ import { NetUtils } from '../../utils/network/netutils';
 import { Phone } from '../../message/phone';
 import { Runtime } from '../../runtime';
 import { StorageManager } from '../../storage/storagemanager';
-import { Result, TcpCmdHandler } from '../tcpcmdhandler';
+import { Result } from '../tcpcmdhandler';
 import { TcpRemoteInfo } from '../remoteinfo';
 
 // Handle send file request command from mobile device.
@@ -25,7 +25,6 @@ export class CmdSendFileRequest extends AuthPhoneCmdHandler {
 
   constructor(rinfo: TcpRemoteInfo, dataVer, cmd) {
     super(rinfo, dataVer, cmd);
-    this.initStates();
   }
 
   public end() {
@@ -41,8 +40,8 @@ export class CmdSendFileRequest extends AuthPhoneCmdHandler {
     }
   }
 
-  protected initStates() {
-    super.initStates();
+  protected onInitStates() {
+    super.onInitStates();
     this.states.push({
       handle: this.fileNameLengthParser.bind(this),
       expectLen: () => { return 4; }

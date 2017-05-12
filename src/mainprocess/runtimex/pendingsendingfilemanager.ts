@@ -1,12 +1,14 @@
 const uuid = require('uuid');
 
 export class PendingSendingFile {
+  filepath: string;
   filename: string;
   fileid: string;
   addtime: number;
 
-  public constructor(filename: string) {
+  public constructor(filename: string, filepath: string) {
     this.filename = filename;
+    this.filepath = filepath;
     this.fileid = uuid.v1().replace(/-/g, '');
   }
 }
@@ -16,8 +18,8 @@ export class PendingSendingFileManager {
   pendingfiles = {};
 
   // return added pending file id
-  public addPendingFile(filename: string): string {
-    let pendingFile = new PendingSendingFile(filename);
+  public addPendingConfirmFile(filename: string, filepath: string): string {
+    let pendingFile = new PendingSendingFile(filename, filepath);
     if (this.pendingfiles[pendingFile.fileid]) {
       console.log('warning, pending file exist already, file id:', pendingFile.fileid, 'file name:', filename);
     }

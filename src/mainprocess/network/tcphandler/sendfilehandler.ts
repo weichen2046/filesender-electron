@@ -17,7 +17,6 @@ export class CmdSendFile extends AuthPhoneCmdHandler {
 
   constructor(rinfo: TcpRemoteInfo, dataVer, cmd) {
     super(rinfo, dataVer, cmd);
-    this.initStates();
   }
 
   public end() {
@@ -33,8 +32,8 @@ export class CmdSendFile extends AuthPhoneCmdHandler {
     }
   }
 
-  protected initStates() {
-    super.initStates();
+  protected onInitStates() {
+    super.onInitStates();
     this.states.push({
       handle: this.fileNameLengthParser.bind(this),
       expectLen: () => { return 4; }

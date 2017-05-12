@@ -12,8 +12,8 @@ export class AuthPhoneCmdHandler extends TcpCmdHandler {
     super(rinfo, dataVer, cmd);
   }
 
-  protected initStates() {
-    super.initStates();
+  protected onInitStates() {
+    super.onInitStates();
     this.states.push({
       handle: this.tokenLengthParser.bind(this),
       expectLen: () => { return 4; }
