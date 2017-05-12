@@ -99,7 +99,7 @@ export class ShareFileHandler extends AsyncMsgHandler {
         client.write(fileid);
         this._allDataSent += fileid.length;
       });
-      runtime.pendingFileManager.sendDelayMessage();
+      runtime.pendingFileManager.setTimeoutForPendingConfirmFiles();
       client.end();
     });
     client.on('close', () => {
@@ -107,98 +107,8 @@ export class ShareFileHandler extends AsyncMsgHandler {
       client = null;
     });
   }
-
-  private sendFiles(paths: string[]) {
-    if (!this._phone.isAuthenticated()) {
-      console.log('can not share file to unauthenticated phone');
-      return;
-    }
-
-    let client = new net.Socket();
-    this._sock = client;
-    client.connect(this._phone.tcpPort, this._phone.address, () => {
-      console.log('send file tcp client connected');
-      // 4 bytes data version
-      // 4 bytes cmd
-      // 4 bytes access token length
-      // x bytes access token
-      // 4 bytes file list length
-      // 4 bytes Nth file name length
-      // x bytes Nth file name
-      // 4 bytes Nth file content length
-      // x bytes Nth file content
-
-      let phone = this._phone;
-      let intBuff = Buffer.alloc(4);
-      // write data version
-      intBuff.writeInt32BE(config.tcp.dataVer, 0);
-      client.write(intBuff);
-      this._allDataSent += 4;
-      // write cmd
-      intBuff.writeInt32BE(config.cmd.pc.cmd_send_file, 0);
-      client.write(intBuff);
-      this._allDataSent += 4;
-      // write access token length
-      intBuff.writeInt32BE(phone.accessToken.length, 0);
-      client.write(intBuff);
-      this._allDataSent += 4;
-      // write access token
-      client.write(phone.accessToken);
-      this._allDataSent += phone.accessToken.length;
-      // write file list length
-      intBuff.writeInt32BE(paths.length, 0);
-      client.write(intBuff);
-      this._allDataSent += 4;
-      this.asyncSendFileOrdered();
-    });
-    client.on('close', () => {
-      console.log('send file tcp client closed, all data send:', this._allDataSent);
-      client = null;
-    });
-  }
-
-  private asyncSendFileOrdered() {
-    if (this._currentSendingFileIndex >= this._paths.length) {
-      console.log(this._paths.length, 'files sent');
-      return;
-    }
-
-    console.log(`send file[${this._currentSendingFileIndex}]: ${this._paths[this._currentSendingFileIndex]}`);
-    let intBuff = Buffer.alloc(4);
-    let client = this._sock;
-    let fullpath = this._paths[this._currentSendingFileIndex];
-    // get file name from path
-    let filename = path.basename(fullpath);
-    // write Nth filename length
-    let fileNameLength = Buffer.byteLength(filename);
-    intBuff.writeInt32BE(fileNameLength, 0);
-    client.write(intBuff);
-    this._allDataSent += 4;
-    // write Nth file name
-    client.write(filename);
-    this._allDataSent += fileNameLength;
-    // wirte Nth file content length
-    let stats = fs.statSync(fullpath);
-    let fileSizeInBytes = stats.size
-    console.log('write path:', fullpath, 'file size:', fileSizeInBytes, 'file name length:', fileNameLength, 'file name:', filename);
-    client.write(new Int64(fileSizeInBytes).toBuffer());
-    this._allDataSent += 8;
-    // write Nth file content
-    let readStream = fs.createReadStream(fullpath);
-    readStream.on('data', (chunk) => {
-      client.write(chunk);
-      this._allDataSent += chunk.length;
-    });
-    readStream.on('end', () => {
-      this._currentSendingFileIndex += 1;
-      if (this._currentSendingFileIndex == this._paths.length) {
-        client.end();
-      } else {
-        setTimeout(this.asyncSendFileOrdered.bind(this), 0);
-      }
-    });
-  }
-
+  
+  // current not used
   private sendSendingFileRequestUdp(paths: string[]) {
     let client = dgram.createSocket('udp4');
     client.bind(() => {

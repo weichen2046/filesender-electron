@@ -13,9 +13,13 @@ export class PendingSendingFile {
   }
 }
 
+interface PendingSendingFileArray {
+  [index: string]: PendingSendingFile
+}
+
 export class PendingSendingFileManager {
   private static TIMEOUT = 30 * 1000; // 30s
-  pendingfiles = {};
+  pendingfiles: PendingSendingFileArray = {};
 
   // return added pending file id
   public addPendingConfirmFile(filename: string, filepath: string): string {
@@ -29,17 +33,16 @@ export class PendingSendingFileManager {
   }
 
   // remove pending file by id, true if removed file count more than 0
-  public removePendingFile(fileid: string): boolean {
+  public removePendingConfirmFile(fileid: string): PendingSendingFile {
     let pendingFile = this.pendingfiles[fileid];
     if (pendingFile) {
       delete this.pendingfiles[fileid];
-      return true;
     }
-    return false;
+    return pendingFile
   }
 
   // return the removed file count
-  public removeOutOfDatePendingFiles(): number {
+  public removeOutOfDatePendingConfirmFiles(): number {
     let timestamp = new Date().getTime();
     let toDelKeys = [];
     for (let k in this.pendingfiles) {
@@ -56,11 +59,11 @@ export class PendingSendingFileManager {
     return toDelKeys.length;
   }
 
-  public sendDelayMessage() {
+  public setTimeoutForPendingConfirmFiles() {
     setTimeout(() => {
       //console.log('before remove out of date dump files:');
       //this.dump();
-      this.removeOutOfDatePendingFiles();
+      this.removeOutOfDatePendingConfirmFiles();
       //console.log('after remove out of date dump files:');
       //this.dump();
     }, PendingSendingFileManager.TIMEOUT);
