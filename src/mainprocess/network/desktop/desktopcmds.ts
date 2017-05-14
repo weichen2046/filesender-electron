@@ -92,7 +92,7 @@ export class DesktopCmds {
 
       // 2) send to each authenticated phone
       let phones = Runtime.instance.phones.filter(p => {
-        return p.accessToken !== undefined && p.accessToken.length != 0;
+        return p && p.accessToken && p.accessToken.length != 0;
       });
       if (phones.length == 0) {
         console.log('no authenticated phone to send desktop offline');
