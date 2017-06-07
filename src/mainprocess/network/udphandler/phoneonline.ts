@@ -58,10 +58,11 @@ export class CmdPhoneOnline extends UdpCmdHandler {
     // 4 bytes -> cmd
     // 4 bytes -> temp access token length
     // x bytes -> temp access token
+    // 4 bytes -> device type
     // 4 bytes -> auth token length
     // x bytes -> auth token
     // 4 bytes -> pc udp port
-    let dataLen = 4 + 4 + 4 + tempToken.length + 4 + phone.authToken.length + 4;
+    let dataLen = 4 + 4 + 4 + 4 + tempToken.length + 4 + phone.authToken.length + 4;
     let msg = Buffer.alloc(dataLen);
     // write data version
     let buffOffset = 0;
@@ -75,8 +76,11 @@ export class CmdPhoneOnline extends UdpCmdHandler {
     // write temp access token
     buffOffset += 4;
     msg.write(tempToken, buffOffset, tempToken.length);
-    // write auth token length
+    // write device type, 1 = Desktop Type
     buffOffset += tempToken.length;
+    msg.writeInt32BE(1, buffOffset);
+    // write auth token length
+    buffOffset += 4;
     msg.writeInt32BE(phone.authToken.length, buffOffset);
     // write auth token
     buffOffset += 4;
